@@ -39,14 +39,13 @@ export default async function IngestPage() {
       where: { userId: user.id },
       include: {
         project: {
-          where: { status: "active" },
-          select: { id: true, name: true, clientId: true, client: { select: { id: true, name: true, industryMajor: true, contractStatus: true } } },
+          select: { id: true, name: true, clientId: true, status: true, client: { select: { id: true, name: true, industryMajor: true, contractStatus: true } } },
         },
       },
     });
 
     const assignedProjects = assignments
-      .filter(a => a.project && a.project.clientId)
+      .filter(a => a.project && a.project.status === "active" && a.project.clientId)
       .map(a => a.project!);
 
     // Deduplicate clients from assigned projects

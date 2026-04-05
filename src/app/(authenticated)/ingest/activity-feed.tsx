@@ -50,8 +50,10 @@ export function ActivityFeed({ initialStats }: { initialStats: Stats }) {
 
   // Expose refresh for external callers
   useEffect(() => {
-    (window as Record<string, unknown>).__refreshActivityFeed = refresh;
-    return () => { delete (window as Record<string, unknown>).__refreshActivityFeed; };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__refreshActivityFeed = refresh;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return () => { delete (window as any).__refreshActivityFeed; };
   }, [refresh]);
 
   const timeAgo = (dateStr: string) => {

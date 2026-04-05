@@ -135,8 +135,10 @@ export function IngestForm({ tags, clients = [], projects = [] }: {
     } catch { /* ignore */ }
 
     // Refresh the activity feed
-    if (typeof window !== "undefined" && (window as Record<string, unknown>).__refreshActivityFeed) {
-      ((window as Record<string, unknown>).__refreshActivityFeed as () => void)();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (typeof window !== "undefined" && (window as any).__refreshActivityFeed) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((window as any).__refreshActivityFeed as () => void)();
     }
 
     setText(""); setTextEn(""); setModelLayer(""); setValueAxis(""); setProvenance("FIELD_OBSERVED");
