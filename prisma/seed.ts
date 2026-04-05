@@ -5,6 +5,10 @@ import { scryptSync, randomBytes } from "crypto";
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.analysisNodeLink.deleteMany();
+  await prisma.analysisMetric.deleteMany();
+  await prisma.analysisNode.deleteMany();
+  await prisma.analysisTree.deleteMany();
   await prisma.similarityClusterMember.deleteMany();
   await prisma.similarityCluster.deleteMany();
   await prisma.crossIndustryPattern.deleteMany();
@@ -387,6 +391,108 @@ async function main() {
       memberCount: 29, modelLayer: "BREAKDOWN", primaryValueAxis: "COST_DOWN",
     },
   });
+
+  // ========== Analysis Tree テンプレート ==========
+  // Tollino Garden 標準PF分析フレームワーク
+
+  const pfTemplate = await prisma.analysisTree.create({
+    data: {
+      title: "店舗PF分析テンプレート（標準）",
+      description: "Tollino Garden標準の店舗パフォーマンス分析フレームワーク。お客様・従業員双方の負を5階層で構造化し、定量指標→要因→対策を導出する。",
+      isTemplate: true,
+      status: "published",
+    },
+  });
+
+  // ── 大分類1: お客様における負の解消 ──
+  const catCustomer = await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, nodeType: "CATEGORY", label: "お客様における負の解消", sortOrder: 1 },
+  });
+
+  // PF: 最大待ち組人数
+  const pfWait = await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: catCustomer.id, nodeType: "PERFORMANCE", label: "最大待ち組人数（お客様の期待/お店の重力）", sortOrder: 1 },
+  });
+  await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: pfWait.id, nodeType: "INDICATOR", label: "最大待ち列組数", sortOrder: 1 },
+  });
+
+  // PF: 機会損失
+  const pfLoss = await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: catCustomer.id, nodeType: "PERFORMANCE", label: "機会損失（許容範囲を超える待ち/在庫切れ）", sortOrder: 2 },
+  });
+  await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: pfLoss.id, nodeType: "INDICATOR", label: "機会損失組数（30分あたり）", sortOrder: 1 },
+  });
+
+  // PF: 並び直した回数
+  const pfReline = await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: catCustomer.id, nodeType: "PERFORMANCE", label: "並び直した回数（一番くじレジ/物販レジの迷い）", sortOrder: 3 },
+  });
+  await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: pfReline.id, nodeType: "INDICATOR", label: "並び間違い回数（30分あたり）", sortOrder: 1 },
+  });
+
+  // PF: レジ稼働率
+  const pfRegister = await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: catCustomer.id, nodeType: "PERFORMANCE", label: "レジ稼働率", sortOrder: 4 },
+  });
+  await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: pfRegister.id, nodeType: "INDICATOR", label: "レジ種別稼働率", sortOrder: 1 },
+  });
+
+  // PF: 待ち時間発生後の体験
+  const pfWaitExp = await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: catCustomer.id, nodeType: "PERFORMANCE", label: "待ち時間発生後、レジ空で余計に待たされた体験", sortOrder: 5 },
+  });
+  await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: pfWaitExp.id, nodeType: "INDICATOR", label: "列待ち・空き時間 各中央値", sortOrder: 1 },
+  });
+
+  // ── 大分類2: 従業員における負の解消 ──
+  const catEmployee = await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, nodeType: "CATEGORY", label: "従業員における負の解消", sortOrder: 2 },
+  });
+
+  // PF: 作業時間の分配
+  const pfWorkDist = await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: catEmployee.id, nodeType: "PERFORMANCE", label: "作業時間の分配", sortOrder: 1 },
+  });
+  await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: pfWorkDist.id, nodeType: "INDICATOR", label: "注文/くじ/ピックの平均所要時間", sortOrder: 1 },
+  });
+  await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: pfWorkDist.id, nodeType: "INDICATOR", label: "付加価値作業比率", sortOrder: 2 },
+  });
+
+  // PF: 心理的な負荷
+  const pfMental = await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: catEmployee.id, nodeType: "PERFORMANCE", label: "心理的な負荷 ＞ お客様からの負の感情", sortOrder: 2 },
+  });
+  await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: pfMental.id, nodeType: "INDICATOR", label: "ピーク時の待機・会話発生比率", sortOrder: 1 },
+  });
+
+  // PF: 身体的な負荷
+  const pfPhysical = await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: catEmployee.id, nodeType: "PERFORMANCE", label: "身体的な負荷", sortOrder: 3 },
+  });
+  await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: pfPhysical.id, nodeType: "INDICATOR", label: "一番くじ 遠いエリアでの景品ピックアップ", sortOrder: 1 },
+  });
+
+  // PF: 開店・閉店作業時間
+  const pfOpenClose = await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: catEmployee.id, nodeType: "PERFORMANCE", label: "開店・閉店作業時間", sortOrder: 4 },
+  });
+  await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: pfOpenClose.id, nodeType: "INDICATOR", label: "レジ作業所要時間 合計", sortOrder: 1 },
+  });
+  await prisma.analysisNode.create({
+    data: { treeId: pfTemplate.id, parentId: pfOpenClose.id, nodeType: "INDICATOR", label: "レジ締め経過時間 平均", sortOrder: 2 },
+  });
+
+  console.log(`Analysis Tree template created: ${pfTemplate.id} with ${await prisma.analysisNode.count({ where: { treeId: pfTemplate.id } })} nodes`);
 
   // Create default users with hashed passwords
   function hashPassword(password: string): string {

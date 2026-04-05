@@ -68,6 +68,7 @@ model Project {
   observations     Observation[]
   uploadedFiles    UploadedFile[]
   assignments      ProjectAssignment[]
+  analysisTrees    AnalysisTree[]
 }
 
 model OntologyTag {
@@ -289,6 +290,7 @@ model User {
   observations Observation[]       @relation("ObservationCreator")
   uploadedFiles UploadedFile[]     @relation("FileUploader")
   projectAssignments ProjectAssignment[]
+  analysisTrees AnalysisTree[]     @relation("TreeCreator")
 }
 
 model Session {
@@ -393,4 +395,100 @@ model ApiAccessLog {
   createdAt      DateTime @default(now())
   @@index([apiClientId, createdAt])
   @@index([endpoint, createdAt])
+}
+
+// ─── Analysis Tree (分析ツリー構造) ───────────────────────────
+// Tollino Gardenの標準コンサルフレームワーク
+// CATEGORY → PERFORMANCE → INDICATOR → FACTOR → COUNTERMEASURE
+// テンプレート（isTemplate=true）を雛形として、PJ毎にクローンして使用
+
+enum AnalysisNodeType {
+  CATEGORY        // 大分類（例：お客様における負の解消、従業員における負の解消）
+  PERFORMANCE     // パフォーマンス領域（例：最大待ち組人数、機会損失）
+  INDICATOR       // PF指標（ビフォーアフター計測データを持つ）
+  FACTOR          // PF向上/阻害する要素（原因分析）
+  COUNTERMEASURE  // 対策要件（施策案）
+}
+
+model AnalysisTree {
+  id          String         @id @default(cuid())
+  projectId   String?                                // テンプレートの場合はnull
+  project     Project?       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String                                 // ツリーのタイトル（例：「小売PF分析テンプレート」）
+  description String?                                // 概要・目的
+  isTemplate  Boolean        @default(false)          // true = 再利用可能なテンプレート
+  templateId  String?                                // クローン元テンプレートのツリーID
+  template    AnalysisTree?  @relation("TreeTemplate", fields: [templateId], references: [id])
+  instances   AnalysisTree[] @relation("TreeTemplate") // このテンプレから生成されたインスタンス
+  status      String         @default("draft")       // draft / published / archived
+  createdById String?
+  createdBy   User?          @relation("TreeCreator", fields: [createdById], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  nodes       AnalysisNode[]
+
+  @@index([projectId])
+  @@index([isTemplate])
+  @@index([templateId])
+}
+
+model AnalysisNode {
+  id                   String             @id @default(cuid())
+  treeId               String
+  tree                 AnalysisTree       @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  parentId             String?                                    // null = ルートノード（CATEGORY）
+  parent               AnalysisNode?      @relation("NodeHierarchy", fields: [parentId], references: [id])
+  children             AnalysisNode[]     @relation("NodeHierarchy")
+  templateNodeId       String?                                    // ★横串集計キー：クローン元テンプレートノードのID
+  nodeType             AnalysisNodeType
+  label                String                                     // 表示テキスト（例：「最大待ち組人数」）
+  description          String?                                    // 補足説明
+  sortOrder            Int                @default(0)             // 同階層内での表示順
+  linkedObservationIds String?                                    // JSON: 根拠となる観察ID配列
+  // FACTOR→COUNTERMEASURE 関連
+  outgoingLinks        AnalysisNodeLink[] @relation("LinkSource")
+  incomingLinks        AnalysisNodeLink[] @relation("LinkTarget")
+  // INDICATOR ノードにのみ紐づく指標データ
+  metrics              AnalysisMetric[]
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@index([treeId])
+  @@index([treeId, nodeType])
+  @@index([parentId])
+  @@index([templateNodeId])
+}
+
+model AnalysisMetric {
+  id            String       @id @default(cuid())
+  nodeId        String
+  node          AnalysisNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  label         String                              // 指標名（例：「物販」「くじ」）
+  unit          String?                             // 単位（組、分、%、秒 等）
+  valueBefore   String?                             // 改善前の値
+  valueAfter    String?                             // 改善後の値
+  colorBefore   String?                             // 改善前の色コード（hex: #ef4444）
+  colorAfter    String?                             // 改善後の色コード（hex: #22c55e）
+  trend         String?                             // improved / worsened / neutral
+  sortOrder     Int          @default(0)            // 同ノード内での表示順
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([nodeId])
+}
+
+// FACTOR→COUNTERMEASURE 間などノード間の横断的関連を表現する結合テーブル
+model AnalysisNodeLink {
+  id           String       @id @default(cuid())
+  sourceNodeId String                                // 起点ノード（通常 FACTOR）
+  sourceNode   AnalysisNode @relation("LinkSource", fields: [sourceNodeId], references: [id], onDelete: Cascade)
+  targetNodeId String                                // 終点ノード（通常 COUNTERMEASURE）
+  targetNode   AnalysisNode @relation("LinkTarget", fields: [targetNodeId], references: [id], onDelete: Cascade)
+  linkType     String       @default("addresses")    // addresses（対応）/ supports（補強）/ contradicts（矛盾）
+  note         String?                               // 関連の補足説明
+  createdAt    DateTime     @default(now())
+
+  @@unique([sourceNodeId, targetNodeId])
+  @@index([sourceNodeId])
+  @@index([targetNodeId])
 }

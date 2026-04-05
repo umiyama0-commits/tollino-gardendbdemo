@@ -208,7 +208,7 @@ export function ProjectList({ projects: initialProjects, clients: initialClients
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-zinc-600">会社名 *</label>
                 <Input value={newClient.name} onChange={e => setNewClient(c => ({ ...c, name: e.target.value }))}
-                  placeholder="例：株式会社トリノガーデン" className="text-sm" />
+                  placeholder="例：株式会社Tollino Garden" className="text-sm" />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-zinc-600">業種 大分類 *</label>
