@@ -91,7 +91,7 @@ export function Navigation({ user }: { user: User }) {
           TG
         </div>
         <div className="leading-tight min-w-0">
-          <div className="text-[13px] font-bold text-white tracking-tight truncate">Torino Garden</div>
+          <div className="text-[13px] font-bold text-white tracking-tight truncate">Tollino Garden</div>
           <div className="text-[9px] text-zinc-500 tracking-wider uppercase font-medium">Main DB</div>
         </div>
       </div>

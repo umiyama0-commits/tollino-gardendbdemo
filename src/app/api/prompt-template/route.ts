@@ -163,9 +163,9 @@ function generateScanPrompt(ctx: {
   ].join("\n") || "  - 特になし";
 
   return `# ${ctx.date} – Daily Tacit Knowledge Ontology Scan
-## Torino Garden Main DB – 公知スキャンプロンプト（自動生成）
+## Tollino Garden Main DB – 公知スキャンプロンプト（自動生成）
 
-> このプロンプトは Torino Garden Main DB のオントロジー構成から自動生成されています。
+> このプロンプトは Tollino Garden Main DB のオントロジー構成から自動生成されています。
 > DB構成が変更されると、このプロンプトも自動的に更新されます。
 > エンドポイント: \`/api/prompt-template?date=${ctx.date}\`
 
@@ -222,7 +222,7 @@ ${theoryTags.map(t => `\`${t.code}\` (${t.displayNameJa})`).join(" / ")}
 ## スキャン指示
 
 ### 目的
-小売・飲食・サービス業の現場における「暗黙知の形式知化」事例を収集し、Torino Gardenのオントロジーに沿って分類する。
+小売・飲食・サービス業の現場における「暗黙知の形式知化」事例を収集し、Tollino Gardenのオントロジーに沿って分類する。
 
 ### 収集基準
 1. **現場レベル**の具体的な行動・プロセスが記述されている事例
@@ -250,7 +250,7 @@ ${theoryTags.map(t => `\`${t.code}\` (${t.displayNameJa})`).join(" / ")}
 - **何が暗黙知だったか**: [記述]
 - **どう形式知化されたか**: [記述]
 - **成果**: [定量的な成果]
-- **Torino Gardenへの示唆**: [オントロジーとの関連]
+- **Tollino Gardenへの示唆**: [オントロジーとの関連]
 - **similarity_hint**: [類似事例検索用キーワード]
 \`\`\`
 

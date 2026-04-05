@@ -31,13 +31,13 @@ function generateCasualResponse(question: string, userName: string, intent: "gre
     if (/さようなら|バイバイ|bye/.test(q)) {
       return `${userName}さん、またいつでもお声がけください！お疲れさまでした。`;
     }
-    return `${timeGreeting}、${userName}さん！\nTorino Garden知見DBのAIアシスタントです。店舗行動観察に関する質問はもちろん、雑談もOKですよ。\n\n何かお手伝いできることはありますか？`;
+    return `${timeGreeting}、${userName}さん！\nTollino Garden知見DBのAIアシスタントです。店舗行動観察に関する質問はもちろん、雑談もOKですよ。\n\n何かお手伝いできることはありますか？`;
   }
 
   // smalltalk
   const q = question.trim();
   if (/自己紹介|名前|誰|何者/.test(q)) {
-    return `私はTorino Gardenの知見AIアシスタントです！\n\n${userName}さんの業務をサポートするために、こんなことができます：\n- 店舗行動観察の知見検索・分析\n- 業種別のベストプラクティス提案\n- データの傾向やインパクト分析\n- もちろん、ちょっとした雑談も\n\nお気軽に何でも聞いてください！`;
+    return `私はTollino Gardenの知見AIアシスタントです！\n\n${userName}さんの業務をサポートするために、こんなことができます：\n- 店舗行動観察の知見検索・分析\n- 業種別のベストプラクティス提案\n- データの傾向やインパクト分析\n- もちろん、ちょっとした雑談も\n\nお気軽に何でも聞いてください！`;
   }
   if (/何ができる|できること|機能|使い方|ヘルプ|help/.test(q)) {
     return `もちろんです！こんなことが得意です：\n\n**知見検索**\n「声掛けの効果は？」「離職率を下げるには？」のように質問してみてください。\n\n**業種別分析**\n「小売業の成功事例」「飲食店の動線改善」など業種を指定できます。\n\n**深掘り対話**\n気になる回答があれば「もっと詳しく」「具体的には？」と続けてください。\n\n**雑談**\n息抜きの会話もお任せください！`;
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
 
     if (apiKey) {
       // Use LLM for natural conversation
-      const chatPrompt = `あなたはTorino Garden知見DBのAIアシスタント「TG」です。
+      const chatPrompt = `あなたはTollino Garden知見DBのAIアシスタント「TG」です。
 ユーザー名は「${user.name}」さんです。
 
 性格:
@@ -176,7 +176,7 @@ export async function POST(request: Request) {
     return `- ${p.name}: ${p.description} [業種:${p.industries}]`;
   }).join("\n");
 
-  const systemPrompt = `あなたはTorino Garden知見DBのAIアシスタント「TG」です。
+  const systemPrompt = `あなたはTollino Garden知見DBのAIアシスタント「TG」です。
 ユーザー名は「${user.name}」さんです。
 
 性格:

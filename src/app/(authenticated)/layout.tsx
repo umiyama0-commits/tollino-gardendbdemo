@@ -21,7 +21,7 @@ export default async function AuthenticatedLayout({
           {children}
         </main>
         <footer className="border-t border-zinc-200 bg-white py-3 px-8">
-          <p className="text-[11px] text-zinc-400 font-medium">Torino Garden Main DB &mdash; Knowledge Intelligence Platform</p>
+          <p className="text-[11px] text-zinc-400 font-medium">Tollino Garden Main DB &mdash; Knowledge Intelligence Platform</p>
         </footer>
       </div>
     </div>

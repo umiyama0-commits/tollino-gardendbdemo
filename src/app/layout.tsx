@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Torino Garden Main DB",
+  title: "Tollino Garden Main DB",
   description: "Knowledge Intelligence Platform",
 };
 

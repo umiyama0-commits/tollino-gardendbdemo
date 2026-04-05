@@ -40,7 +40,7 @@ export default function LoginPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#191919] text-sm font-black">
               TG
             </div>
-            <span className="text-white/90 text-sm font-semibold tracking-tight">Torino Garden</span>
+            <span className="text-white/90 text-sm font-semibold tracking-tight">Tollino Garden</span>
           </div>
         </div>
         <div className="relative z-10 space-y-4">
@@ -57,7 +57,7 @@ export default function LoginPage() {
           </div>
         </div>
         <div className="relative z-10">
-          <p className="text-zinc-600 text-[11px]">Torino Garden Main DB v1.0</p>
+          <p className="text-zinc-600 text-[11px]">Tollino Garden Main DB v1.0</p>
         </div>
         {/* Background gradient decoration */}
         <div className="absolute inset-0 bg-gradient-to-br from-zinc-800/30 via-transparent to-blue-900/10" />
@@ -72,7 +72,7 @@ export default function LoginPage() {
             <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#191919] text-sm font-black">
               TG
             </div>
-            <h1 className="text-lg font-bold text-white tracking-tight">Torino Garden Main DB</h1>
+            <h1 className="text-lg font-bold text-white tracking-tight">Tollino Garden Main DB</h1>
           </div>
 
           {/* Login form */}
@@ -99,7 +99,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@torino-garden.com"
+                  placeholder="name@tollino-garden.com"
                   className="w-full rounded-lg border border-zinc-600 bg-[#191919] px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all"
                   autoComplete="email"
                 />
@@ -142,9 +142,9 @@ export default function LoginPage() {
             <div className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Demo Accounts</div>
             <div className="space-y-2 text-[12px]">
               {[
-                { role: "Admin", email: "admin@torino-garden.com", pw: "admin123" },
-                { role: "Consultant", email: "tanaka@torino-garden.com", pw: "tanaka123" },
-                { role: "Viewer", email: "viewer@torino-garden.com", pw: "viewer123" },
+                { role: "Admin", email: "admin@tollino-garden.com", pw: "admin123" },
+                { role: "Consultant", email: "tanaka@tollino-garden.com", pw: "tanaka123" },
+                { role: "Viewer", email: "viewer@tollino-garden.com", pw: "viewer123" },
               ].map((acc) => (
                 <div key={acc.role} className="flex justify-between items-center">
                   <span className="font-medium text-zinc-300">{acc.role}</span>

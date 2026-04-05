@@ -397,9 +397,9 @@ async function main() {
 
   await prisma.user.createMany({
     data: [
-      { name: "管理者", email: "admin@torino-garden.com", passwordHash: hashPassword("admin123"), role: "admin" },
-      { name: "田中太郎", email: "tanaka@torino-garden.com", passwordHash: hashPassword("tanaka123"), role: "consultant" },
-      { name: "閲覧ユーザー", email: "viewer@torino-garden.com", passwordHash: hashPassword("viewer123"), role: "viewer" },
+      { name: "管理者", email: "admin@tollino-garden.com", passwordHash: hashPassword("admin123"), role: "admin" },
+      { name: "田中太郎", email: "tanaka@tollino-garden.com", passwordHash: hashPassword("tanaka123"), role: "consultant" },
+      { name: "閲覧ユーザー", email: "viewer@tollino-garden.com", passwordHash: hashPassword("viewer123"), role: "viewer" },
     ],
   });
 

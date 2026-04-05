@@ -69,7 +69,10 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(gh auth:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f''''name: {d.get\\(\"\"name\"\"\\)}, private: {d.get\\(\"\"private\"\"\\)}''''\\)\")",
+      "Bash(sed -i '' 's/Torino Garden/Tollino Garden/g' src/app/layout.tsx src/app/login/page.tsx src/app/api/prompt-template/route.ts src/app/api/ai-chat/route.ts src/app/\\\\\\(authenticated\\\\\\)/layout.tsx)",
+      "Bash(sed -i '' 's/torino-garden/tollino-garden/g' src/app/login/page.tsx prisma/seed.ts)"
     ]
   }
 }
