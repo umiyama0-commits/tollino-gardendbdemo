@@ -97,6 +97,7 @@ model Observation {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
   tags             ObservationTag[]
+  rawFiles         RawFile[]
 
   @@index([provenance])
   @@index([modelLayer])
@@ -189,6 +190,31 @@ model User {
   role          String         @default("consultant")
   createdAt     DateTime       @default(now())
   analysisTrees AnalysisTree[] @relation("TreeCreator")
+}
+
+// ─── Raw Files (生データファイル管理) ────────────────────────────
+// コンパイラ・パイプラインの第1段: raw/ 取り込み
+// 報告書PDF・日報テキスト・動画等のアップロードファイルを管理
+// fileType values: PDF, DOCX, TXT, CSV, MP4, MOV, PNG, JPG, OTHER
+
+model RawFile {
+  id              String        @id @default(cuid())
+  fileName        String
+  fileType        String
+  mimeType        String
+  fileSize        Int
+  blobUrl         String
+  status          String        @default("uploaded") // uploaded, extracting, extracted, error
+  extractedText   String?
+  errorMessage    String?
+  observationId   String?
+  observation     Observation?  @relation(fields: [observationId], references: [id], onDelete: SetNull)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([status])
+  @@index([observationId])
+  @@index([createdAt])
 }
 
 // ─── Analysis Tree (PF分析ツリー構造) ───────────────────────────

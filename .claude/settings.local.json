@@ -35,7 +35,8 @@
       "WebFetch(domain:api.github.com)",
       "Bash(npx vercel:*)",
       "Bash(DATABASE_URL=\"postgresql://dummy:dummy@localhost:5432/dummy\" npx prisma generate)",
-      "Bash(DATABASE_URL=\"postgresql://dummy:dummy@localhost:5432/dummy\" npx next build)"
+      "Bash(DATABASE_URL=\"postgresql://dummy:dummy@localhost:5432/dummy\" npx next build)",
+      "WebFetch(domain:tollino-gardendbdemo-e7zl3pfat-umiyama0-9834s-projects.vercel.app)"
     ]
   }
 }

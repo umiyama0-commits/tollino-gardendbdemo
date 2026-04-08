@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { IngestForm } from "./ingest-form";
+import { IngestTabs } from "./ingest-tabs";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +20,10 @@ export default async function IngestPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Data Ingest</h1>
         <p className="text-zinc-500 mt-1 text-sm">
-          観測事実を構造化して登録。適切なタグ付けが信頼度チェーンの基盤になります。
+          観測事実を構造化して登録。報告書・日報・動画のファイルアップロードにも対応。
         </p>
       </div>
-      <IngestForm tagsByType={tagsByType} />
+      <IngestTabs tagsByType={tagsByType} />
     </div>
   );
 }
