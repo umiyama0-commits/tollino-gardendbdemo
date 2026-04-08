@@ -15,7 +15,7 @@ const DEFAULT_CONFIGS = [
   { key: "llm.model", value: "gpt-4o", label: "使用モデル", category: "llm" },
   { key: "llm.temperature", value: "0.3", label: "Temperature", category: "llm" },
   // 信頼スコア設定
-  { key: "trust.halfLifeDays", value: "180", label: "信頼スコア半減期（日）", category: "trust" },
+  { key: "trust.halfLifeDays", value: "900", label: "信頼スコア半減期（日）", category: "trust" },
   { key: "trust.fieldWeight", value: "3.0", label: "固有知ウェイト", category: "trust" },
   { key: "trust.anonWeight", value: "2.0", label: "汎用知ウェイト", category: "trust" },
   { key: "trust.publicWeight", value: "0.5", label: "公知ウェイト", category: "trust" },
@@ -32,11 +32,20 @@ const DEFAULT_CONFIGS = [
 
 // GET: 設定一覧
 export async function GET() {
-  // 初回起動: デフォルト設定がなければ投入
+  // デフォルト設定を upsert（初回起動 + デフォルト値変更時に反映）
   const count = await prisma.systemConfig.count();
   if (count === 0) {
     for (const config of DEFAULT_CONFIGS) {
       await prisma.systemConfig.create({ data: config });
+    }
+  } else {
+    // デフォルト値が変更された場合、ユーザーが手動変更していなければ更新
+    for (const config of DEFAULT_CONFIGS) {
+      await prisma.systemConfig.upsert({
+        where: { key: config.key },
+        update: {}, // 既存レコードはそのまま
+        create: config,
+      });
     }
   }
 
