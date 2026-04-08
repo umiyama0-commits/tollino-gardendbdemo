@@ -26,7 +26,12 @@
       "Bash(npx next:*)",
       "Bash(pkill -f \"next dev\")",
       "WebFetch(domain:tollino-gardendbdemo.vercel.app)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(gh api:*)",
+      "Bash(ls /Users/umiyamatakeshi/tollino-garden-db/src/app/\\\\\\(authenticated\\\\\\)/)"
     ]
   }
 }
