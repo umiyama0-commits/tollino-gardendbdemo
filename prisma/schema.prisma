@@ -10,7 +10,7 @@ datasource db {
 model Client {
   id             String    @id @default(cuid())
   name           String
-  industry       String
+  industry       String    @default("")
   industryDetail String?
   scale          String?
   contractStatus String    @default("active")
