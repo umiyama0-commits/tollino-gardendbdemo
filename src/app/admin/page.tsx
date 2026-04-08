@@ -4,7 +4,20 @@ import { AdminPanel } from "./admin-panel";
 
 export const dynamic = "force-dynamic";
 
+// デフォルト値マイグレーション: 旧デフォルトを新デフォルトに更新
+const CONFIG_MIGRATIONS: Record<string, string> = {
+  "trust.halfLifeDays": "900",
+};
+
 async function AdminData() {
+  // まずマイグレーションを実行
+  for (const [key, newValue] of Object.entries(CONFIG_MIGRATIONS)) {
+    await prisma.systemConfig.updateMany({
+      where: { key, value: { not: newValue } },
+      data: { value: newValue },
+    }).catch(() => {});
+  }
+
   const [users, configs, stats] = await Promise.all([
     prisma.user.findMany({
       select: { id: true, name: true, email: true, role: true, apiKey: true, lastLoginAt: true, createdAt: true },
