@@ -1,0 +1,279 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id             String    @id @default(cuid())
+  name           String
+  industry       String
+  industryDetail String?
+  scale          String?
+  contractStatus String    @default("active")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  stores         Store[]
+  projects       Project[]
+
+  @@index([industry])
+}
+
+model Store {
+  id           String        @id @default(cuid())
+  clientId     String
+  client       Client        @relation(fields: [clientId], references: [id])
+  name         String
+  locationType String
+  area         Float?
+  staffCount   Int?
+  address      String?
+  createdAt    DateTime      @default(now())
+  spatialZones SpatialZone[]
+  observations Observation[]
+}
+
+model SpatialZone {
+  id       String @id @default(cuid())
+  storeId  String
+  store    Store  @relation(fields: [storeId], references: [id])
+  name     String
+  zoneType String
+}
+
+model Project {
+  id               String        @id @default(cuid())
+  clientId         String
+  client           Client        @relation(fields: [clientId], references: [id])
+  name             String
+  hypothesisTheme  String?
+  primaryValueAxis String?
+  targetKPI        String?
+  status           String        @default("active")
+  startDate        DateTime?
+  endDate          DateTime?
+  createdAt        DateTime       @default(now())
+  observations     Observation[]
+  analysisTrees    AnalysisTree[]
+}
+
+model OntologyTag {
+  id              String           @id @default(cuid())
+  type            String
+  level           Int              @default(1)
+  code            String           @unique
+  displayNameJa   String
+  displayNameEn   String?
+  description     String?
+  modelLayer      String?
+  category        String?
+  parentId        String?
+  parent          OntologyTag?     @relation("TagHierarchy", fields: [parentId], references: [id])
+  children        OntologyTag[]    @relation("TagHierarchy")
+  clientId        String?
+  observationTags ObservationTag[]
+  insightTags     InsightTag[]
+}
+
+model Observation {
+  id               String           @id @default(cuid())
+  projectId        String?
+  project          Project?         @relation(fields: [projectId], references: [id])
+  storeId          String?
+  store            Store?           @relation(fields: [storeId], references: [id])
+  text             String
+  subjectivity     String           @default("objective")
+  confidence       String           @default("MEDIUM")
+  modelLayer       String
+  provenance       String           @default("FIELD_OBSERVED")
+  primaryValueAxis String?
+  sourceType       String?
+  sourceUrl        String?
+  sourceTitle      String?
+  similarityHint   String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  tags             ObservationTag[]
+
+  @@index([provenance])
+  @@index([modelLayer])
+  @@index([primaryValueAxis])
+  @@index([createdAt])
+  @@index([projectId])
+  @@index([storeId])
+}
+
+model ObservationTag {
+  id            String      @id @default(cuid())
+  observationId String
+  observation   Observation @relation(fields: [observationId], references: [id], onDelete: Cascade)
+  tagId         String
+  tag           OntologyTag @relation(fields: [tagId], references: [id])
+
+  @@index([observationId])
+  @@index([tagId])
+}
+
+model Insight {
+  id                   String                    @id @default(cuid())
+  text                 String
+  evidenceStrength     String                    @default("MEDIUM")
+  generalizability     String                    @default("MEDIUM")
+  applicableConditions String?
+  counterConditions    String?
+  valueImpact          String?
+  primaryValueAxis     String?
+  modelLayer           String?
+  provenance           String                    @default("FIELD_OBSERVED")
+  derivedFromId        String?
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  tags                 InsightTag[]
+  clusterMemberships   SimilarityClusterMember[]
+
+  @@index([provenance])
+  @@index([createdAt])
+}
+
+model InsightTag {
+  id        String      @id @default(cuid())
+  insightId String
+  insight   Insight     @relation(fields: [insightId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       OntologyTag @relation(fields: [tagId], references: [id])
+
+  @@index([insightId])
+  @@index([tagId])
+}
+
+model CrossIndustryPattern {
+  id               String   @id @default(cuid())
+  name             String
+  description      String
+  industries       String
+  modelLayer       String?
+  primaryValueAxis String?
+  insightCount     Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model SimilarityCluster {
+  id               String                    @id @default(cuid())
+  name             String
+  description      String?
+  memberCount      Int                       @default(0)
+  modelLayer       String?
+  primaryValueAxis String?
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+  members          SimilarityClusterMember[]
+}
+
+model SimilarityClusterMember {
+  id        String            @id @default(cuid())
+  clusterId String
+  cluster   SimilarityCluster @relation(fields: [clusterId], references: [id])
+  insightId String
+  insight   Insight           @relation(fields: [insightId], references: [id])
+  addedAt   DateTime          @default(now())
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  role          String         @default("consultant")
+  createdAt     DateTime       @default(now())
+  analysisTrees AnalysisTree[] @relation("TreeCreator")
+}
+
+// ─── Analysis Tree (PF分析ツリー構造) ───────────────────────────
+// Tollino Gardenの標準コンサルフレームワーク
+// CATEGORY → PERFORMANCE → INDICATOR → FACTOR → COUNTERMEASURE
+// テンプレート（isTemplate=true）を雛形として、PJ毎にクローンして使用
+
+// AnalysisNodeType values: CATEGORY, PERFORMANCE, INDICATOR, FACTOR, COUNTERMEASURE
+
+model AnalysisTree {
+  id          String         @id @default(cuid())
+  projectId   String?
+  project     Project?       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  isTemplate  Boolean        @default(false)
+  templateId  String?
+  template    AnalysisTree?  @relation("TreeTemplate", fields: [templateId], references: [id])
+  instances   AnalysisTree[] @relation("TreeTemplate")
+  status      String         @default("draft")
+  createdById String?
+  createdBy   User?          @relation("TreeCreator", fields: [createdById], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  nodes       AnalysisNode[]
+
+  @@index([projectId])
+  @@index([isTemplate])
+  @@index([templateId])
+}
+
+model AnalysisNode {
+  id                   String             @id @default(cuid())
+  treeId               String
+  tree                 AnalysisTree       @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  parentId             String?
+  parent               AnalysisNode?      @relation("NodeHierarchy", fields: [parentId], references: [id])
+  children             AnalysisNode[]     @relation("NodeHierarchy")
+  templateNodeId       String?
+  nodeType             String
+  label                String
+  description          String?
+  sortOrder            Int                @default(0)
+  linkedObservationIds String?
+  outgoingLinks        AnalysisNodeLink[] @relation("LinkSource")
+  incomingLinks        AnalysisNodeLink[] @relation("LinkTarget")
+  metrics              AnalysisMetric[]
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@index([treeId])
+  @@index([treeId, nodeType])
+  @@index([parentId])
+  @@index([templateNodeId])
+}
+
+model AnalysisMetric {
+  id          String       @id @default(cuid())
+  nodeId      String
+  node        AnalysisNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  label       String
+  unit        String?
+  valueBefore String?
+  valueAfter  String?
+  colorBefore String?
+  colorAfter  String?
+  trend       String?
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([nodeId])
+}
+
+model AnalysisNodeLink {
+  id           String       @id @default(cuid())
+  sourceNodeId String
+  sourceNode   AnalysisNode @relation("LinkSource", fields: [sourceNodeId], references: [id], onDelete: Cascade)
+  targetNodeId String
+  targetNode   AnalysisNode @relation("LinkTarget", fields: [targetNodeId], references: [id], onDelete: Cascade)
+  linkType     String       @default("addresses")
+  note         String?
+  createdAt    DateTime     @default(now())
+
+  @@unique([sourceNodeId, targetNodeId])
+  @@index([sourceNodeId])
+  @@index([targetNodeId])
+}
