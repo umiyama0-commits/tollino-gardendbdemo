@@ -23,7 +23,7 @@ export function Navigation() {
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-md bg-gradient-to-br from-blue-500 to-cyan-400" />
             <span className="font-semibold text-[15px] tracking-tight">
-              Trino Garden Main DB
+              Tollino Garden Main DB
             </span>
           </Link>
           <nav className="flex gap-0.5">
