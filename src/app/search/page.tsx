@@ -86,9 +86,9 @@ export default function SearchPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Search</h1>
+        <h1 className="text-3xl font-bold tracking-tight">検索</h1>
         <p className="text-zinc-500 mt-1 text-sm">
-          Observation + Insight を横断検索。業種で絞り込み、信頼度チェーンで確認。
+          観測データと洞察を横断検索。業種で絞り込み、信頼度チェーンで確認。
         </p>
       </div>
 
@@ -198,7 +198,7 @@ export default function SearchPage() {
           {results.observations.length > 0 && (
             <div>
               <h2 className="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-3">
-                Observations ({results.observations.length})
+                観測データ ({results.observations.length}件)
               </h2>
               <div className="space-y-2">
                 {results.observations.map((obs) => (
@@ -212,7 +212,7 @@ export default function SearchPage() {
           {results.insights.length > 0 && (
             <div>
               <h2 className="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-3">
-                Insights ({results.insights.length})
+                洞察 ({results.insights.length}件)
               </h2>
               <div className="space-y-2">
                 {results.insights.map((ins) => (

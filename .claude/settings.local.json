@@ -36,7 +36,11 @@
       "Bash(npx vercel:*)",
       "Bash(DATABASE_URL=\"postgresql://dummy:dummy@localhost:5432/dummy\" npx prisma generate)",
       "Bash(DATABASE_URL=\"postgresql://dummy:dummy@localhost:5432/dummy\" npx next build)",
-      "WebFetch(domain:tollino-gardendbdemo-e7zl3pfat-umiyama0-9834s-projects.vercel.app)"
+      "WebFetch(domain:tollino-gardendbdemo-e7zl3pfat-umiyama0-9834s-projects.vercel.app)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_5cRKbxOywlD7@ep-dawn-sun-a188511d.ap-southeast-1.aws.neon.tech/neondb?sslmode=require\" npx prisma db push)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_5cRKbxOywlD7@ep-dawn-sun-a188511d.ap-southeast-1.aws.neon.tech/neondb?sslmode=require\" npx prisma db push --accept-data-loss)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_5cRKbxOywlD7@ep-dawn-sun-a188511d.ap-southeast-1.aws.neon.tech/neondb?sslmode=require\" npx prisma db execute --stdin 2)",
+      "Bash(1:*)"
     ]
   }
 }

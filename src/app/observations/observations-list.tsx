@@ -37,25 +37,25 @@ type Props = {
 };
 
 const FILTER_PROVENANCE = [
-  { value: "ALL", label: "ALL" },
+  { value: "ALL", label: "すべて" },
   { value: "FIELD_OBSERVED", label: "①固有知" },
   { value: "ANONYMIZED_DERIVED", label: "②汎用知" },
   { value: "PUBLIC_CODIFIED", label: "③公知" },
 ];
 
 const FILTER_LAYER = [
-  { value: "ALL", label: "ALL" },
-  { value: "MOVEMENT", label: "MOVEMENT" },
-  { value: "APPROACH", label: "APPROACH" },
-  { value: "BREAKDOWN", label: "BREAKDOWN" },
-  { value: "TRANSFER", label: "TRANSFER" },
+  { value: "ALL", label: "すべて" },
+  { value: "MOVEMENT", label: "動線" },
+  { value: "APPROACH", label: "接点" },
+  { value: "BREAKDOWN", label: "離脱" },
+  { value: "TRANSFER", label: "伝承" },
 ];
 
 const FILTER_VALUE = [
-  { value: "ALL", label: "ALL" },
-  { value: "REVENUE_UP", label: "Revenue UP" },
-  { value: "COST_DOWN", label: "Cost DOWN" },
-  { value: "RETENTION", label: "Retention" },
+  { value: "ALL", label: "すべて" },
+  { value: "REVENUE_UP", label: "売上向上" },
+  { value: "COST_DOWN", label: "コスト削減" },
+  { value: "RETENTION", label: "継続率向上" },
 ];
 
 export function ObservationsList({ observations, industries }: Props) {
@@ -89,7 +89,7 @@ export function ObservationsList({ observations, industries }: Props) {
         <CardContent className="pt-4 pb-4">
           <div className="flex flex-wrap gap-x-8 gap-y-3">
             <FilterGroup
-              label="Provenance"
+              label="プロベナンス"
               options={FILTER_PROVENANCE}
               value={filterProvenance}
               onChange={setFilterProvenance}
@@ -132,7 +132,7 @@ export function ObservationsList({ observations, industries }: Props) {
               <TableHead className="text-xs font-medium">業種</TableHead>
               <TableHead className="text-xs font-medium">層</TableHead>
               <TableHead className="text-xs font-medium">価値軸</TableHead>
-              <TableHead className="text-xs font-medium">Provenance</TableHead>
+              <TableHead className="text-xs font-medium">プロベナンス</TableHead>
               <TableHead className="text-xs font-medium">タグ</TableHead>
             </TableRow>
           </TableHeader>

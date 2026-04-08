@@ -29,7 +29,7 @@ export default async function ObservationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Observations</h1>
+        <h1 className="text-3xl font-bold tracking-tight">観測データ</h1>
         <p className="text-zinc-500 mt-1 text-sm">
           蓄積された観測データ。フィルタで絞り込み、詳細を確認。
         </p>

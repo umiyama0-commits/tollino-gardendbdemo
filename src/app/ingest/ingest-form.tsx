@@ -27,16 +27,16 @@ type Props = {
 };
 
 const MODEL_LAYERS = [
-  { value: "MOVEMENT", label: "MOVEMENT", sub: "動線" },
-  { value: "APPROACH", label: "APPROACH", sub: "接点" },
-  { value: "BREAKDOWN", label: "BREAKDOWN", sub: "離脱" },
-  { value: "TRANSFER", label: "TRANSFER", sub: "伝承" },
+  { value: "MOVEMENT", label: "動線" },
+  { value: "APPROACH", label: "接点" },
+  { value: "BREAKDOWN", label: "離脱" },
+  { value: "TRANSFER", label: "伝承" },
 ];
 
 const VALUE_AXES = [
-  { value: "REVENUE_UP", label: "Revenue UP" },
-  { value: "COST_DOWN", label: "Cost DOWN" },
-  { value: "RETENTION", label: "Retention" },
+  { value: "REVENUE_UP", label: "売上向上" },
+  { value: "COST_DOWN", label: "コスト削減" },
+  { value: "RETENTION", label: "継続率向上" },
 ];
 
 const PROVENANCES = [
@@ -46,16 +46,16 @@ const PROVENANCES = [
 ];
 
 const CONFIDENCES = [
-  { value: "HIGH", label: "HIGH" },
-  { value: "MEDIUM", label: "MEDIUM" },
-  { value: "LOW", label: "LOW" },
+  { value: "HIGH", label: "高" },
+  { value: "MEDIUM", label: "中" },
+  { value: "LOW", label: "低" },
 ];
 
 const TAG_TYPE_CONFIG: Record<string, { label: string; bg: string; selectedBg: string }> = {
-  BEHAVIOR: { label: "行動タグ (Behavior)", bg: "bg-blue-50/50 border border-blue-100", selectedBg: "bg-blue-600 hover:bg-blue-700 text-white" },
-  CONTEXT: { label: "コンテキストタグ (Context)", bg: "bg-green-50/50 border border-green-100", selectedBg: "bg-green-600 hover:bg-green-700 text-white" },
-  SPACE: { label: "空間タグ (Space)", bg: "bg-amber-50/50 border border-amber-100", selectedBg: "bg-amber-600 hover:bg-amber-700 text-white" },
-  THEORY: { label: "理論タグ (Theory)", bg: "bg-purple-50/50 border border-purple-100", selectedBg: "bg-purple-600 hover:bg-purple-700 text-white" },
+  BEHAVIOR: { label: "行動タグ", bg: "bg-blue-50/50 border border-blue-100", selectedBg: "bg-blue-600 hover:bg-blue-700 text-white" },
+  CONTEXT: { label: "文脈タグ", bg: "bg-green-50/50 border border-green-100", selectedBg: "bg-green-600 hover:bg-green-700 text-white" },
+  SPACE: { label: "空間タグ", bg: "bg-amber-50/50 border border-amber-100", selectedBg: "bg-amber-600 hover:bg-amber-700 text-white" },
+  THEORY: { label: "理論タグ", bg: "bg-purple-50/50 border border-purple-100", selectedBg: "bg-purple-600 hover:bg-purple-700 text-white" },
 };
 
 type SuggestResponse = {
@@ -247,8 +247,7 @@ export function IngestForm({ tagsByType }: Props) {
                   <SelectContent>
                     {MODEL_LAYERS.map((l) => (
                       <SelectItem key={l.value} value={l.value}>
-                        <span className="font-medium">{l.label}</span>
-                        <span className="text-zinc-400 ml-1.5">{l.sub}</span>
+                        {l.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -273,7 +272,7 @@ export function IngestForm({ tagsByType }: Props) {
               </div>
               <div>
                 <Label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                  Provenance *
+                  プロベナンス *
                 </Label>
                 <Select value={provenance} onValueChange={(v) => setProvenance(v ?? "")}>
                   <SelectTrigger className="mt-2 bg-white">
@@ -372,7 +371,7 @@ export function IngestForm({ tagsByType }: Props) {
               className="bg-white"
             />
             <p className="text-[11px] text-zinc-400 mt-2 leading-relaxed">
-              上記の保存時に LOW 信頼度の Observation として自動登録されます
+              上記の保存時に「低」信頼度の観測データとして自動登録されます
             </p>
           </CardContent>
         </Card>
@@ -413,7 +412,7 @@ export function IngestForm({ tagsByType }: Props) {
         <Card className="shadow-sm bg-zinc-950 text-white">
           <CardContent className="pt-5 pb-5 space-y-3">
             <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
-              Provenance ガイド
+              プロベナンスガイド
             </p>
             <div className="space-y-2.5 text-[12px] leading-relaxed">
               <div className="flex gap-2">

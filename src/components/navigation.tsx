@@ -5,11 +5,11 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/", label: "Dashboard" },
-  { href: "/ingest", label: "Ingest" },
-  { href: "/observations", label: "Observations" },
-  { href: "/search", label: "Search" },
-  { href: "/patterns", label: "Patterns" },
+  { href: "/", label: "ダッシュボード" },
+  { href: "/ingest", label: "データ取込" },
+  { href: "/observations", label: "観測データ" },
+  { href: "/search", label: "検索" },
+  { href: "/patterns", label: "パターン" },
   { href: "/analysis-trees", label: "PF分析" },
 ];
 

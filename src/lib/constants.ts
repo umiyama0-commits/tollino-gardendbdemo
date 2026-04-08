@@ -1,14 +1,14 @@
 export const VALUE_AXIS_CONFIG: Record<string, { label: string; color: string; bg: string; bar: string }> = {
-  REVENUE_UP: { label: "Revenue UP", color: "text-blue-700", bg: "bg-blue-50 border border-blue-200", bar: "bg-blue-500" },
-  COST_DOWN: { label: "Cost DOWN", color: "text-teal-700", bg: "bg-teal-50 border border-teal-200", bar: "bg-teal-500" },
-  RETENTION: { label: "Retention", color: "text-amber-700", bg: "bg-amber-50 border border-amber-200", bar: "bg-amber-500" },
+  REVENUE_UP: { label: "売上向上", color: "text-blue-700", bg: "bg-blue-50 border border-blue-200", bar: "bg-blue-500" },
+  COST_DOWN: { label: "コスト削減", color: "text-teal-700", bg: "bg-teal-50 border border-teal-200", bar: "bg-teal-500" },
+  RETENTION: { label: "継続率向上", color: "text-amber-700", bg: "bg-amber-50 border border-amber-200", bar: "bg-amber-500" },
 };
 
 export const MODEL_LAYER_CONFIG: Record<string, { label: string; color: string; bg: string; bar: string }> = {
-  MOVEMENT: { label: "MOVEMENT", color: "text-blue-700", bg: "bg-blue-50 border border-blue-200", bar: "bg-blue-500" },
-  APPROACH: { label: "APPROACH", color: "text-cyan-700", bg: "bg-cyan-50 border border-cyan-200", bar: "bg-cyan-500" },
-  BREAKDOWN: { label: "BREAKDOWN", color: "text-red-700", bg: "bg-red-50 border border-red-200", bar: "bg-red-500" },
-  TRANSFER: { label: "TRANSFER", color: "text-green-700", bg: "bg-green-50 border border-green-200", bar: "bg-green-500" },
+  MOVEMENT: { label: "動線", color: "text-blue-700", bg: "bg-blue-50 border border-blue-200", bar: "bg-blue-500" },
+  APPROACH: { label: "接点", color: "text-cyan-700", bg: "bg-cyan-50 border border-cyan-200", bar: "bg-cyan-500" },
+  BREAKDOWN: { label: "離脱", color: "text-red-700", bg: "bg-red-50 border border-red-200", bar: "bg-red-500" },
+  TRANSFER: { label: "伝承", color: "text-green-700", bg: "bg-green-50 border border-green-200", bar: "bg-green-500" },
 };
 
 export const PROVENANCE_CONFIG: Record<string, { label: string; shortLabel: string; color: string; bg: string; dot: string }> = {

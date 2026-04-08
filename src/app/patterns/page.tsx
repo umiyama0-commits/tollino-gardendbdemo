@@ -14,7 +14,7 @@ export default async function PatternsPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">
-          Cross-Industry Patterns
+          業種横断パターン
         </h1>
         <p className="text-zinc-500 mt-1 text-sm">
           業種を横断して確認された共通パターン。裏付け件数が多いほど再現性が高い。

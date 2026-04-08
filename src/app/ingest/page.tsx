@@ -18,7 +18,7 @@ export default async function IngestPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Data Ingest</h1>
+        <h1 className="text-3xl font-bold tracking-tight">データ取込</h1>
         <p className="text-zinc-500 mt-1 text-sm">
           観測事実を構造化して登録。報告書・日報・動画のファイルアップロードにも対応。
         </p>

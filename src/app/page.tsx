@@ -90,7 +90,7 @@ export default async function Dashboard() {
     <div className="space-y-8">
       {/* Hero */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">ダッシュボード</h1>
         <p className="text-zinc-500 mt-1 text-sm">
           ナレッジの蓄積状況と信頼度の概況
         </p>
@@ -98,8 +98,8 @@ export default async function Dashboard() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard label="Observations" value={observationCount} accent="blue" />
-        <StatCard label="Insights" value={insightCount} accent="cyan" />
+        <StatCard label="観測データ" value={observationCount} accent="blue" />
+        <StatCard label="洞察" value={insightCount} accent="cyan" />
         <StatCard label="横断パターン" value={patternCount} accent="violet" />
         <StatCard
           label="多層裏付け"
@@ -114,7 +114,7 @@ export default async function Dashboard() {
       <Card className="shadow-sm">
         <CardContent className="pt-6">
           <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">
-            Provenance 分布
+            プロベナンス分布
           </p>
           <div className="flex h-3 rounded-full overflow-hidden bg-zinc-100">
             {fieldCount > 0 && (

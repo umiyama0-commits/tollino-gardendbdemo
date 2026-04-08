@@ -303,7 +303,7 @@ export function FileUpload() {
                         disabled={saving}
                         className="text-xs h-7"
                       >
-                        {saving ? "保存中..." : "Observation登録"}
+                        {saving ? "保存中..." : "観測として登録"}
                       </Button>
                     ) : null}
                   </div>
@@ -325,14 +325,14 @@ export function FileUpload() {
               <span className="shrink-0">📄</span>
               <div>
                 <p className="font-medium">報告書 (PDF/Word)</p>
-                <p className="text-zinc-400">テキスト自動抽出 → LLM構造化 → Observation登録</p>
+                <p className="text-zinc-400">テキスト自動抽出 → AI構造化 → 観測として登録</p>
               </div>
             </div>
             <div className="flex gap-2">
               <span className="shrink-0">📃</span>
               <div>
                 <p className="font-medium">日報 (TXT/CSV)</p>
-                <p className="text-zinc-400">テキスト読み込み → LLM構造化 → Observation登録</p>
+                <p className="text-zinc-400">テキスト読み込み → AI構造化 → 観測として登録</p>
               </div>
             </div>
             <div className="flex gap-2">

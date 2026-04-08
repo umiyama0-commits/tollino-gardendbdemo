@@ -36,7 +36,7 @@ export default function Error({
         </div>
         {error.digest && (
           <p className="text-[10px] text-zinc-300 pt-4">
-            Error ID: {error.digest}
+            エラーID: {error.digest}
           </p>
         )}
       </div>
