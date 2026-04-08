@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Trino Garden Main DB",
+  title: "Tollino Garden Main DB",
   description: "店舗行動観測ナレッジベース",
 };
 
