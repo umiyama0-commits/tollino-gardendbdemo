@@ -170,6 +170,14 @@ export async function autoGeneratePatterns(): Promise<{
     // 2つ以上の業種にまたがる場合のみパターン化
     if (industries.size < 2) continue;
 
+    // 公知のみで構成されるパターンは除外（固有知 or 汎用知が最低1件必要）
+    const hasNonPublic = cluster.members.some((member) =>
+      member.insight.sourceObservations.some((link) =>
+        link.observation.provenance !== "PUBLIC_CODIFIED"
+      )
+    );
+    if (!hasNonPublic) continue;
+
     // 既存パターンと重複チェック
     const existingPattern = await prisma.crossIndustryPattern.findFirst({
       where: {

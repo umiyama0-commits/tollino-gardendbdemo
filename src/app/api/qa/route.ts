@@ -8,31 +8,9 @@ import { answerQuestion } from "@/lib/llm-qa";
 import { generateInsights } from "@/lib/llm-insight";
 import { searchSimilarObservations, searchSimilarInsights } from "@/lib/embedding";
 import { QAQuestionInput, QAFeedbackInput, safeParse } from "@/lib/validation";
+import { applyProvenanceCap, getPublicRatioCap } from "@/lib/trust-score";
 
 export const dynamic = "force-dynamic";
-
-/**
- * Provenance比率キャップ: 公知(PUBLIC_CODIFIED)の割合を制限
- * 固有知・汎用知を優先的に残し、公知は上限割合まで
- */
-function applyProvenanceCap<T extends { provenance: string }>(
-  items: T[],
-  limit: number,
-  publicRatioCap: number,
-): T[] {
-  const nonPublic = items.filter((i) => i.provenance !== "PUBLIC_CODIFIED");
-  const publicItems = items.filter((i) => i.provenance === "PUBLIC_CODIFIED");
-
-  // 固有知・汎用知を先に確保
-  const result = nonPublic.slice(0, limit);
-
-  // 残り枠に公知を入れる（全体のpublicRatioCap以下に制限）
-  const maxPublic = Math.floor(limit * publicRatioCap);
-  const publicSlots = Math.min(maxPublic, limit - result.length, publicItems.length);
-  result.push(...publicItems.slice(0, publicSlots));
-
-  return result.slice(0, limit);
-}
 
 // POST: 質問→回答（RAG: embedding類似検索で関連データを取得）
 export async function POST(req: NextRequest) {
@@ -45,10 +23,7 @@ export async function POST(req: NextRequest) {
 
   // RAG: embedding類似検索で質問に関連するデータを取得
   // Provenance比率キャップ: 公知(PUBLIC_CODIFIED)はコンテキストの最大N%（マスターコンフィグ）
-  const capConfig = await prisma.systemConfig.findUnique({
-    where: { key: "ingest.publicRatioCap" },
-  }).catch(() => null);
-  const PUBLIC_RATIO_CAP = parseFloat(capConfig?.value || "0.3");
+  const PUBLIC_RATIO_CAP = await getPublicRatioCap();
   const OBS_LIMIT = 30;
   const INS_LIMIT = 20;
 
@@ -163,9 +138,9 @@ export async function PATCH(req: NextRequest) {
       ? JSON.parse(session.referencedObservationIds)
       : [];
 
-    // 質問に関連するObservationを取得（参照済み + テキスト検索）
+    // 質問に関連するObservationを取得（参照済み + テキスト検索）+ 公知比率キャップ
     const keywords = session.question.split(/\s+/).filter((w) => w.length >= 2).slice(0, 3);
-    const relatedObs = await prisma.observation.findMany({
+    const allRelatedObs = await prisma.observation.findMany({
       where: {
         OR: [
           { id: { in: refObsIds } },
@@ -173,8 +148,10 @@ export async function PATCH(req: NextRequest) {
         ],
       },
       include: { tags: { include: { tag: true } } },
-      take: 15,
+      take: 30,
     });
+    const selfImproveCap = await getPublicRatioCap();
+    const relatedObs = applyProvenanceCap(allRelatedObs, 15, selfImproveCap);
 
     if (relatedObs.length >= 2) {
       // LLMで追加Insightを生成

@@ -28,6 +28,44 @@ export function getProvenanceWeight(provenance: string): number {
   return PROVENANCE_WEIGHT[provenance] ?? 0.3;
 }
 
+/**
+ * Provenance比率キャップ（全モジュール共通）
+ * 固有知・汎用知を優先的に残し、公知(PUBLIC_CODIFIED)を上限比率に制限する。
+ * 公知がいくら増えても、分析・生成プロセスへの影響に天井を設ける。
+ *
+ * @param items - provenance フィールドを持つアイテム配列
+ * @param limit - 最大取得件数
+ * @param publicRatioCap - 公知の上限比率 (0.0〜1.0, デフォルト0.3)
+ */
+export function applyProvenanceCap<T extends { provenance: string }>(
+  items: T[],
+  limit: number,
+  publicRatioCap: number = 0.3,
+): T[] {
+  const nonPublic = items.filter((i) => i.provenance !== "PUBLIC_CODIFIED");
+  const publicItems = items.filter((i) => i.provenance === "PUBLIC_CODIFIED");
+
+  // 固有知・汎用知を先に確保
+  const result = nonPublic.slice(0, limit);
+
+  // 残り枠に公知を入れる（全体の publicRatioCap 以下に制限）
+  const maxPublic = Math.floor(limit * publicRatioCap);
+  const publicSlots = Math.min(maxPublic, limit - result.length, publicItems.length);
+  result.push(...publicItems.slice(0, publicSlots));
+
+  return result.slice(0, limit);
+}
+
+/**
+ * マスターコンフィグから公知比率上限を取得
+ */
+export async function getPublicRatioCap(): Promise<number> {
+  const config = await prisma.systemConfig.findUnique({
+    where: { key: "ingest.publicRatioCap" },
+  }).catch(() => null);
+  return parseFloat(config?.value || "0.3");
+}
+
 /** Observationの信頼スコアを計算 */
 export function computeObservationTrustScore(obs: {
   confidence: string;

@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { lintKnowledgeBase } from "@/lib/llm-lint";
 import { generateInsights } from "@/lib/llm-insight";
-import { recalculateAllTrustScores } from "@/lib/trust-score";
+import { recalculateAllTrustScores, applyProvenanceCap, getPublicRatioCap } from "@/lib/trust-score";
 import { backfillEmbeddings } from "@/lib/embedding";
 import { autoClusterInsights, autoGeneratePatterns } from "@/lib/clustering";
 import { saveInsightEmbedding } from "@/lib/embedding";
@@ -70,24 +70,27 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const { modelLayer } = body as { modelLayer?: string };
 
-  // Observation + Insight を取得
+  // Observation + Insight を取得（公知比率キャップ適用）
+  const publicCap = await getPublicRatioCap();
   const obsWhere: Record<string, unknown> = {};
   if (modelLayer) obsWhere.modelLayer = modelLayer;
 
-  const observations = await prisma.observation.findMany({
+  const allObs = await prisma.observation.findMany({
     where: obsWhere,
-    orderBy: { createdAt: "desc" },
-    take: 30,
+    orderBy: [{ trustScore: "desc" }, { createdAt: "desc" }],
+    take: 60,
   });
+  const observations = applyProvenanceCap(allObs, 30, publicCap);
 
   const insWhere: Record<string, unknown> = {};
   if (modelLayer) insWhere.modelLayer = modelLayer;
 
-  const insights = await prisma.insight.findMany({
+  const allIns = await prisma.insight.findMany({
     where: insWhere,
-    orderBy: { createdAt: "desc" },
-    take: 20,
+    orderBy: [{ trustScore: "desc" }, { createdAt: "desc" }],
+    take: 40,
   });
+  const insights = applyProvenanceCap(allIns, 20, publicCap);
 
   const items = [
     ...observations.map((o) => ({
@@ -180,13 +183,15 @@ async function resolveGaps() {
         })
       : null;
 
-    // テーマ関連Observationを取得
-    const relatedObs = await prisma.observation.findMany({
+    // テーマ関連Observationを取得（公知比率キャップ）
+    const gapCap = await getPublicRatioCap();
+    const allRelatedObs = await prisma.observation.findMany({
       where: targetObs?.modelLayer ? { modelLayer: targetObs.modelLayer } : {},
       include: { tags: { include: { tag: true } } },
       orderBy: { trustScore: "desc" },
-      take: 15,
+      take: 30,
     });
+    const relatedObs = applyProvenanceCap(allRelatedObs, 15, gapCap);
 
     if (relatedObs.length < 2) continue;
 

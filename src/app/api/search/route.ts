@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { searchSimilarObservations, searchSimilarInsights } from "@/lib/embedding";
-import { getProvenanceWeight } from "@/lib/trust-score";
+import { getProvenanceWeight, applyProvenanceCap, getPublicRatioCap } from "@/lib/trust-score";
 
 export async function GET(request: NextRequest) {
   const sp = request.nextUrl.searchParams;
@@ -60,9 +60,14 @@ export async function GET(request: NextRequest) {
         if (ind) industrySet.add(ind);
       }
 
+      // 公知比率キャップ適用
+      const searchCap = await getPublicRatioCap();
+      const cappedObs = applyProvenanceCap(obsWithScore, 50, searchCap);
+      const cappedIns = applyProvenanceCap(insWithScore, 30, searchCap);
+
       return NextResponse.json({
-        observations: obsWithScore,
-        insights: insWithScore,
+        observations: cappedObs,
+        insights: cappedIns,
         industries: [...industrySet],
         searchMode: "semantic",
       });
@@ -170,9 +175,14 @@ export async function GET(request: NextRequest) {
     if (ind) industrySet.add(ind);
   }
 
+  // キーワード検索結果にも公知比率キャップ適用
+  const kwCap = await getPublicRatioCap();
+  const cappedObservations = applyProvenanceCap(observations, 100, kwCap);
+  const cappedInsights = applyProvenanceCap(insights, 100, kwCap);
+
   return NextResponse.json({
-    observations,
-    insights,
+    observations: cappedObservations,
+    insights: cappedInsights,
     industries: [...industrySet],
   });
 }

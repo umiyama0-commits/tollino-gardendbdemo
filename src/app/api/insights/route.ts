@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { generateInsights } from "@/lib/llm-insight";
 import { saveInsightEmbedding } from "@/lib/embedding";
 import { CreateInsightInput, safeParse } from "@/lib/validation";
+import { applyProvenanceCap, getPublicRatioCap } from "@/lib/trust-score";
 
 export const dynamic = "force-dynamic";
 
@@ -48,27 +49,29 @@ export async function POST(req: NextRequest) {
   const { observationIds, modelLayer } = parsed.data;
 
   // observationIds指定 or modelLayer指定でObservationを取得
-  let observations;
+  // 公知比率キャップ: LLMに渡すObservationの公知割合を制限
+  const publicCap = await getPublicRatioCap();
+  let allObservations;
   if (observationIds && observationIds.length > 0) {
-    observations = await prisma.observation.findMany({
+    allObservations = await prisma.observation.findMany({
       where: { id: { in: observationIds } },
       include: { tags: { include: { tag: true } } },
     });
   } else if (modelLayer) {
-    observations = await prisma.observation.findMany({
+    allObservations = await prisma.observation.findMany({
       where: { modelLayer },
       include: { tags: { include: { tag: true } } },
-      orderBy: { createdAt: "desc" },
-      take: 20,
+      orderBy: [{ trustScore: "desc" }, { createdAt: "desc" }],
+      take: 40, // 多めに取得してからキャップ
     });
   } else {
-    // 全体から最新20件
-    observations = await prisma.observation.findMany({
+    allObservations = await prisma.observation.findMany({
       include: { tags: { include: { tag: true } } },
-      orderBy: { createdAt: "desc" },
-      take: 20,
+      orderBy: [{ trustScore: "desc" }, { createdAt: "desc" }],
+      take: 40,
     });
   }
+  const observations = applyProvenanceCap(allObservations, 20, publicCap);
 
   if (observations.length < 2) {
     return NextResponse.json(
