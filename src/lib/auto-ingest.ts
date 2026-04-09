@@ -84,12 +84,66 @@ const PREFERRED_SOURCES = [
   "diamond.jp",              // ダイヤモンド・オンライン
 ];
 
-// 国別検索の重み付け: 日本の事例を優先
-const COUNTRY_SEARCH_WEIGHT: Record<string, { priority: number; langHint: string }> = {
-  JP: { priority: 0.5, langHint: "日本語で検索" },    // 50%は日本語ソース
-  US: { priority: 0.25, langHint: "English" },         // 25%は英語(米国)
-  GLOBAL: { priority: 0.25, langHint: "English or 日本語" }, // 25%はグローバル
+// 国コード → 言語・検索ヒント
+const COUNTRY_LANG_HINT: Record<string, string> = {
+  JP: "日本語",
+  SG: "English (Singapore)",
+  US: "English (US)",
+  HK: "繁體中文 or English (Hong Kong)",
+  AU: "English (Australia)",
+  TW: "繁體中文 (Taiwan)",
+  KR: "한국어 (Korea)",
+  CN: "简体中文 (China)",
+  TH: "English or ไทย (Thailand)",
+  GB: "English (UK)",
+  DE: "Deutsch (Germany)",
+  FR: "Français (France)",
 };
+
+/**
+ * マスターコンフィグから国別取込比率を読み込む
+ * フォーマット: "JP:70,SG:6,US:6,HK:6,AU:6,TW:6"
+ */
+async function getCountryWeights(): Promise<{ code: string; weight: number; langHint: string }[]> {
+  const config = await prisma.systemConfig.findUnique({
+    where: { key: "ingest.countryWeights" },
+  }).catch(() => null);
+
+  const raw = config?.value || "JP:70,SG:6,US:6,HK:6,AU:6,TW:6";
+  const entries = raw.split(",").map((pair) => {
+    const [code, weightStr] = pair.trim().split(":");
+    return {
+      code: code.trim(),
+      weight: parseInt(weightStr?.trim() || "0", 10),
+      langHint: COUNTRY_LANG_HINT[code.trim()] || "English",
+    };
+  }).filter((e) => e.weight > 0);
+
+  return entries;
+}
+
+/**
+ * 国別比率に基づいてクエリ数を配分
+ * 例: 100件, JP:70% → JP向けクエリ70個相当
+ */
+function allocateQueriesByCountry(
+  totalQueries: number,
+  weights: { code: string; weight: number }[],
+): { code: string; count: number }[] {
+  const totalWeight = weights.reduce((sum, w) => sum + w.weight, 0);
+  const result: { code: string; count: number }[] = [];
+  let allocated = 0;
+
+  for (let i = 0; i < weights.length; i++) {
+    const count = i === weights.length - 1
+      ? totalQueries - allocated // 最後は残り全部
+      : Math.round((weights[i].weight / totalWeight) * totalQueries);
+    result.push({ code: weights[i].code, count: Math.max(count, 1) });
+    allocated += count;
+  }
+
+  return result;
+}
 
 /**
  * ソース品質スコア: URL中のドメインで学術・業界ソースを優遇
@@ -122,8 +176,11 @@ export async function runAutoIngest(options?: { batchSize?: number }): Promise<I
   const result: IngestResult = { ingested: 0, skippedDuplicates: 0, skippedErrors: 0, errors: [], details: [] };
 
   try {
-    // Step 1: ギャップ分析 → 検索クエリ生成
-    const queries = await generateSearchQueries(batchSize);
+    // Step 0: マスターコンフィグから国別比率を読み込み
+    const countryWeights = await getCountryWeights();
+
+    // Step 1: ギャップ分析 → 検索クエリ生成（国別比率対応）
+    const queries = await generateSearchQueries(batchSize, countryWeights);
     if (queries.length === 0) {
       result.errors.push("検索クエリの生成に失敗しました");
       return result;
@@ -203,7 +260,10 @@ export async function runAutoIngest(options?: { batchSize?: number }): Promise<I
 
 // ─── Step 1: 検索クエリ生成 ──────────────────────────────
 
-async function generateSearchQueries(count: number): Promise<SearchQuery[]> {
+async function generateSearchQueries(
+  count: number,
+  countryWeights?: { code: string; weight: number; langHint: string }[],
+): Promise<SearchQuery[]> {
   // ギャップ情報を取得
   const gaps = await prisma.lintResult.findMany({
     where: { type: { in: ["gap", "topic_suggestion"] }, status: "open" },
@@ -255,10 +315,10 @@ ${MODEL_LAYERS.join("、")}
 3. 専門メディア（ダイヤモンド, 日経ビジネス等）
 4. 一般ニュースは最後の手段
 
-## 国・言語の比率
-- 50%のクエリは日本語で（日本の事例・研究を重視）
-- 25%のクエリは英語で（米国・英国の先進事例）
-- 25%のクエリはグローバル（国際比較・普遍的理論）
+## 国・言語の比率（マスターコンフィグ設定）
+${(countryWeights || [{ code: "JP", weight: 70, langHint: "日本語" }]).map((cw) =>
+  `- ${cw.code}(${cw.weight}%): ${cw.langHint}`
+).join("\n")}
 
 ## 新しさの重視
 - 過去5年以内（2021年以降）の研究を優先

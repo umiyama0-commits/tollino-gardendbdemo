@@ -28,6 +28,10 @@ const DEFAULT_CONFIGS = [
   // クラスタリング設定
   { key: "cluster.similarityThreshold", value: "0.7", label: "クラスタ類似度閾値", category: "trust" },
   { key: "cluster.minIndustries", value: "2", label: "パターン生成最低業種数", category: "trust" },
+  // 自動取込設定
+  { key: "ingest.dailyLimit", value: "100", label: "1日あたり自動取込件数", category: "ingest" },
+  { key: "ingest.publicRatioCap", value: "0.3", label: "Q&A公知比率上限", category: "ingest" },
+  { key: "ingest.countryWeights", value: "JP:70,SG:6,US:6,HK:6,AU:6,TW:6", label: "国別取込比率(%)", category: "ingest" },
 ];
 
 // GET: 設定一覧

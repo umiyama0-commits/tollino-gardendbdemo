@@ -19,7 +19,14 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const result = await runAutoIngest({ batchSize: 100 });
+  // マスターコンフィグからバッチサイズ取得
+  const { prisma } = await import("@/lib/prisma");
+  const limitConfig = await prisma.systemConfig.findUnique({
+    where: { key: "ingest.dailyLimit" },
+  }).catch(() => null);
+  const batchSize = parseInt(limitConfig?.value || "100", 10);
+
+  const result = await runAutoIngest({ batchSize });
 
   return NextResponse.json({
     success: true,

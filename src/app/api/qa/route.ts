@@ -44,8 +44,11 @@ export async function POST(req: NextRequest) {
   const { question } = parsed.data;
 
   // RAG: embedding類似検索で質問に関連するデータを取得
-  // Provenance比率キャップ: 公知(PUBLIC_CODIFIED)はコンテキストの最大30%
-  const PUBLIC_RATIO_CAP = 0.3;
+  // Provenance比率キャップ: 公知(PUBLIC_CODIFIED)はコンテキストの最大N%（マスターコンフィグ）
+  const capConfig = await prisma.systemConfig.findUnique({
+    where: { key: "ingest.publicRatioCap" },
+  }).catch(() => null);
+  const PUBLIC_RATIO_CAP = parseFloat(capConfig?.value || "0.3");
   const OBS_LIMIT = 30;
   const INS_LIMIT = 20;
 

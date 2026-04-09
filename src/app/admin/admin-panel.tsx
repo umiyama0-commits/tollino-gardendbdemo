@@ -34,6 +34,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   llm: "LLM設定",
   trust: "信頼スコア・クラスタ",
   display: "表示設定",
+  ingest: "自動取込設定",
   general: "一般",
 };
 
