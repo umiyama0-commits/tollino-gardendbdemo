@@ -70,6 +70,51 @@ const MODEL_LAYERS = ["MOVEMENT", "APPROACH", "BREAKDOWN", "TRANSFER"];
 const INDUSTRIES = ["眼鏡小売", "アパレル", "飲食", "不動産", "保険", "美容室"];
 const DEFAULT_BATCH_SIZE = 100;
 
+// 検索ソース優先度: 学術DB・業界レポート > 一般ニュース
+const PREFERRED_SOURCES = [
+  "scholar.google.com",      // Google Scholar
+  "j-stage.jst.go.jp",       // J-STAGE（日本の学術論文）
+  "ci.nii.ac.jp",            // CiNii（日本の学術DB）
+  "jmra-net.or.jp",          // 日本マーケティングリサーチ協会
+  "meti.go.jp",              // 経産省統計・レポート
+  "nri.com",                 // 野村総研
+  "mckinsey.com",            // McKinsey
+  "hbr.org",                 // Harvard Business Review
+  "retaildive.com",          // RetailDive（小売業界メディア）
+  "diamond.jp",              // ダイヤモンド・オンライン
+];
+
+// 国別検索の重み付け: 日本の事例を優先
+const COUNTRY_SEARCH_WEIGHT: Record<string, { priority: number; langHint: string }> = {
+  JP: { priority: 0.5, langHint: "日本語で検索" },    // 50%は日本語ソース
+  US: { priority: 0.25, langHint: "English" },         // 25%は英語(米国)
+  GLOBAL: { priority: 0.25, langHint: "English or 日本語" }, // 25%はグローバル
+};
+
+/**
+ * ソース品質スコア: URL中のドメインで学術・業界ソースを優遇
+ * 高品質ソースから優先的にデータを取り込む
+ */
+function scoreSourceQuality(url: string): number {
+  const domain = url.toLowerCase();
+  // Tier 1: 学術DB (スコア 1.0)
+  if (domain.includes("scholar.google") || domain.includes("j-stage.jst.go.jp") ||
+      domain.includes("ci.nii.ac.jp") || domain.includes("pubmed") ||
+      domain.includes("researchgate.net") || domain.includes("arxiv.org")) return 1.0;
+  // Tier 2: 政府・研究機関 (スコア 0.9)
+  if (domain.includes(".go.jp") || domain.includes(".gov") ||
+      domain.includes("nri.com") || domain.includes("mckinsey.com") ||
+      domain.includes("hbr.org") || domain.includes("bcg.com")) return 0.9;
+  // Tier 3: 業界メディア (スコア 0.7)
+  if (domain.includes("retaildive.com") || domain.includes("diamond.jp") ||
+      domain.includes("nikkei.com") || domain.includes("toyokeizai.net") ||
+      domain.includes("jmra-net.or.jp")) return 0.7;
+  // Tier 4: 一般メディア (スコア 0.4)
+  if (domain.includes(".ac.jp") || domain.includes(".edu")) return 0.8;
+  // Tier 5: その他 (スコア 0.3)
+  return 0.3;
+}
+
 // ─── メインパイプライン ───────────────────────────────────
 
 export async function runAutoIngest(options?: { batchSize?: number }): Promise<IngestResult> {
@@ -84,14 +129,16 @@ export async function runAutoIngest(options?: { batchSize?: number }): Promise<I
       return result;
     }
 
-    // Step 2: Web検索
-    const candidates: { result: SearchResult; query: SearchQuery }[] = [];
+    // Step 2: Web検索 → ソース品質でソート
+    const candidates: { result: SearchResult; query: SearchQuery; sourceQuality: number }[] = [];
     for (const q of queries) {
       const searchResults = await searchWeb(q.query, 3);
       for (const sr of searchResults) {
-        candidates.push({ result: sr, query: q });
+        candidates.push({ result: sr, query: q, sourceQuality: scoreSourceQuality(sr.url) });
       }
     }
+    // 学術・業界ソースを優先
+    candidates.sort((a, b) => b.sourceQuality - a.sourceQuality);
 
     // 検索APIなしの場合、LLMの内部知識で生成
     if (candidates.length === 0) {
@@ -202,11 +249,27 @@ ${MODEL_LAYERS.join("、")}
 ## タスク
 上記のギャップとカバレッジを踏まえ、公開されている学術研究・業界レポート・専門家の知見を検索するためのクエリを${count}個生成してください。
 
+## 検索先の優先順位
+1. 学術論文・研究（J-STAGE, Google Scholar, CiNii, HBR）
+2. 業界レポート・統計（経産省, NRI, McKinsey, RetailDive）
+3. 専門メディア（ダイヤモンド, 日経ビジネス等）
+4. 一般ニュースは最後の手段
+
+## 国・言語の比率
+- 50%のクエリは日本語で（日本の事例・研究を重視）
+- 25%のクエリは英語で（米国・英国の先進事例）
+- 25%のクエリはグローバル（国際比較・普遍的理論）
+
+## 新しさの重視
+- 過去5年以内（2021年以降）の研究を優先
+- クエリに年号（"2023" "2024" "最新"）を含めるとよい
+- ただし古典的理論（ヒックの法則等）も必要に応じて含める
+
 ## 出力フォーマット (JSON)
 {
   "queries": [
     {
-      "query": "検索クエリ（日本語 or 英語）",
+      "query": "検索クエリ（日本語 or 英語。site:指定も可）",
       "targetModelLayer": "MOVEMENT|APPROACH|BREAKDOWN|TRANSFER",
       "targetIndustry": "業種名",
       "rationale": "このクエリを選んだ理由"
