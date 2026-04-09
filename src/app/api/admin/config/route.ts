@@ -43,11 +43,11 @@ export async function GET() {
       await prisma.systemConfig.create({ data: config });
     }
   } else {
-    // 新しいキーがあれば追加 + デフォルト値の強制同期
+    // 新しいキーがあれば追加（既存valueは上書きしない — ユーザー編集を保持）
     for (const config of DEFAULT_CONFIGS) {
       await prisma.systemConfig.upsert({
         where: { key: config.key },
-        update: { value: config.value, label: config.label, category: config.category },
+        update: { label: config.label, category: config.category },
         create: config,
       });
     }
