@@ -152,7 +152,7 @@ export function AdminPanel({
                   try {
                     const res = await fetch("/api/auto-ingest", { method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ batchSize: 10 }),
+                      body: JSON.stringify({ batchSize: 100 }),
                     });
                     const data = await res.json();
                     setMessage(

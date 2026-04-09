@@ -14,9 +14,24 @@ function timeDecay(createdAt: Date): number {
   return Math.exp(-lambda * ageDays);
 }
 
+/**
+ * Provenance重み付け: 固有知 > 汎用知 >> 公知
+ * 公知は補完的位置づけ。量が増えてもスコアで固有知を上回らない設計。
+ */
+const PROVENANCE_WEIGHT: Record<string, number> = {
+  FIELD_OBSERVED: 1.0,       // 現場で観測された一次情報 → 最高重み
+  ANONYMIZED_DERIVED: 0.7,   // 匿名化・汎化された知見 → 高い重み
+  PUBLIC_CODIFIED: 0.3,      // 公開文献・理論 → 補完的重み
+};
+
+export function getProvenanceWeight(provenance: string): number {
+  return PROVENANCE_WEIGHT[provenance] ?? 0.3;
+}
+
 /** Observationの信頼スコアを計算 */
 export function computeObservationTrustScore(obs: {
   confidence: string;
+  provenance: string;
   createdAt: Date;
   insightLinkCount: number;
 }): number {
@@ -26,9 +41,13 @@ export function computeObservationTrustScore(obs: {
   // Insightにリンクされている → +0.1（知見導出に使われた実績）
   if (obs.insightLinkCount > 0) base += 0.1;
 
+  // Provenance重み付け: 公知は最大でも固有知の30%程度のスコア
+  const provWeight = getProvenanceWeight(obs.provenance);
+  base *= provWeight;
+
   // 時間減衰を適用
   const decay = timeDecay(obs.createdAt);
-  let score = base * decay;
+  const score = base * decay;
 
   return Math.min(Math.max(score, 0), 1.0);
 }
@@ -75,6 +94,7 @@ export async function recalculateAllTrustScores(): Promise<{
   for (const obs of observations) {
     const score = computeObservationTrustScore({
       confidence: obs.confidence,
+      provenance: obs.provenance,
       createdAt: obs.createdAt,
       insightLinkCount: obs.insightLinks.length,
     });

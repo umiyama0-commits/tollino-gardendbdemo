@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { searchSimilarObservations, searchSimilarInsights } from "@/lib/embedding";
+import { getProvenanceWeight } from "@/lib/trust-score";
 
 export async function GET(request: NextRequest) {
   const sp = request.nextUrl.searchParams;
@@ -39,16 +40,18 @@ export async function GET(request: NextRequest) {
         include: { tags: { include: { tag: true } } },
       }) : [];
 
-      // 類似度スコアを付与
-      const obsWithScore = observations.map((obs) => ({
-        ...obs,
-        _similarity: obsResults.find((r) => r.id === obs.id)?.similarity || 0,
-      })).sort((a, b) => b._similarity - a._similarity);
+      // 類似度スコア × Provenance重みでランキング（固有知・汎用知を優先）
+      const obsWithScore = observations.map((obs) => {
+        const similarity = obsResults.find((r) => r.id === obs.id)?.similarity || 0;
+        const provWeight = getProvenanceWeight(obs.provenance);
+        return { ...obs, _similarity: similarity, _rankScore: similarity * (0.5 + 0.5 * provWeight) };
+      }).sort((a, b) => b._rankScore - a._rankScore);
 
-      const insWithScore = insights.map((ins) => ({
-        ...ins,
-        _similarity: insResults.find((r) => r.id === ins.id)?.similarity || 0,
-      })).sort((a, b) => b._similarity - a._similarity);
+      const insWithScore = insights.map((ins) => {
+        const similarity = insResults.find((r) => r.id === ins.id)?.similarity || 0;
+        const provWeight = getProvenanceWeight(ins.provenance);
+        return { ...ins, _similarity: similarity, _rankScore: similarity * (0.5 + 0.5 * provWeight) };
+      }).sort((a, b) => b._rankScore - a._rankScore);
 
       const industrySet = new Set<string>();
       for (const obs of observations) {
@@ -142,7 +145,7 @@ export async function GET(request: NextRequest) {
             store: { select: { client: { select: { industry: true, industryDetail: true } } } },
             project: { select: { client: { select: { industry: true, industryDetail: true } } } },
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: [{ trustScore: "desc" }, { createdAt: "desc" }],
           take: 100,
         })
       : Promise.resolve([]),
@@ -150,7 +153,7 @@ export async function GET(request: NextRequest) {
       ? prisma.insight.findMany({
           where: insWhere,
           include: { tags: { include: { tag: true } } },
-          orderBy: { createdAt: "desc" },
+          orderBy: [{ trustScore: "desc" }, { createdAt: "desc" }],
           take: 100,
         })
       : Promise.resolve([]),

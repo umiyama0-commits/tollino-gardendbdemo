@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const result = await runAutoIngest({ batchSize: 10 });
+  const result = await runAutoIngest({ batchSize: 100 });
 
   return NextResponse.json({
     success: true,
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     if (body.batchSize && typeof body.batchSize === "number") {
-      batchSize = Math.min(body.batchSize, 20); // 最大20件
+      batchSize = Math.min(body.batchSize, 100); // 最大100件
     }
   } catch {
     // bodyなしでもOK
