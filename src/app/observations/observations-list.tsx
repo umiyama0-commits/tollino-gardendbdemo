@@ -125,15 +125,15 @@ export function ObservationsList({ observations, industries }: Props) {
 
       {/* Table */}
       <Card className="shadow-sm overflow-hidden">
-        <Table>
+        <Table className="table-fixed w-full">
           <TableHeader>
             <TableRow className="bg-zinc-50/50">
               <TableHead className="w-[40%] text-xs font-medium">テキスト</TableHead>
-              <TableHead className="text-xs font-medium">業種</TableHead>
-              <TableHead className="text-xs font-medium">層</TableHead>
-              <TableHead className="text-xs font-medium">価値軸</TableHead>
-              <TableHead className="text-xs font-medium">プロベナンス</TableHead>
-              <TableHead className="text-xs font-medium">タグ</TableHead>
+              <TableHead className="w-[8%] text-xs font-medium">業種</TableHead>
+              <TableHead className="w-[7%] text-xs font-medium">層</TableHead>
+              <TableHead className="w-[9%] text-xs font-medium">価値軸</TableHead>
+              <TableHead className="w-[9%] text-xs font-medium">プロベナンス</TableHead>
+              <TableHead className="w-[18%] text-xs font-medium">タグ</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -150,7 +150,9 @@ export function ObservationsList({ observations, industries }: Props) {
                   className="cursor-pointer hover:bg-blue-50/30 transition-colors"
                   onClick={() => setSelectedId(obs.id === selectedId ? null : obs.id)}
                 >
-                  <TableCell className="text-sm py-3">{obs.text}</TableCell>
+                  <TableCell className="text-sm py-3">
+                    <p className="truncate" title={obs.text}>{obs.text}</p>
+                  </TableCell>
                   <TableCell>
                     {obsIndustry && (
                       <Badge className="bg-violet-50 border border-violet-200 text-violet-700 text-[11px] px-1.5 py-0">

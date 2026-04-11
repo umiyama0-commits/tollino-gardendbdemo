@@ -14,7 +14,7 @@ export const MODEL_LAYER_CONFIG: Record<string, { label: string; color: string; 
 export const PROVENANCE_CONFIG: Record<string, { label: string; shortLabel: string; color: string; bg: string; dot: string }> = {
   FIELD_OBSERVED: { label: "固有知（実観測）", shortLabel: "①固有知", color: "text-zinc-800", bg: "bg-zinc-100 border border-zinc-300", dot: "bg-zinc-800" },
   ANONYMIZED_DERIVED: { label: "汎用知（匿名化）", shortLabel: "②汎用知", color: "text-blue-700", bg: "bg-blue-50 border border-blue-200", dot: "bg-blue-500" },
-  PUBLIC_CODIFIED: { label: "公知（形式知）", shortLabel: "③公知", color: "text-zinc-500", bg: "bg-zinc-50 border border-zinc-200", dot: "bg-zinc-400" },
+  PUBLIC_CODIFIED: { label: "公知（形式知）", shortLabel: "③公知", color: "text-purple-700", bg: "bg-purple-50 border border-purple-200", dot: "bg-purple-500" },
 };
 
 export const CONFIDENCE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
