@@ -174,10 +174,9 @@ export function ObservationsList({ observations, industries }: Props) {
                   </TableCell>
                   <TableCell>
                     {provConfig && (
-                      <div className="flex items-center gap-1.5">
-                        <div className={`w-2 h-2 rounded-full ${provConfig.dot}`} />
-                        <span className="text-[11px] text-zinc-600">{provConfig.shortLabel}</span>
-                      </div>
+                      <Badge className={`${provConfig.bg} ${provConfig.color} text-[11px] px-1.5 py-0`}>
+                        {provConfig.shortLabel}
+                      </Badge>
                     )}
                   </TableCell>
                   <TableCell>
