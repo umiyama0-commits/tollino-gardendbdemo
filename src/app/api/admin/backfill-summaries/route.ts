@@ -5,7 +5,6 @@ import { generateSummary } from "@/lib/summary";
 
 export async function POST() {
   const observations = await prisma.observation.findMany({
-    where: { summary: null },
     select: { id: true, text: true },
   });
 

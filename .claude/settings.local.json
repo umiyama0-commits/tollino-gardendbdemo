@@ -82,7 +82,10 @@
       "Bash(brew install:*)",
       "Bash(echo $PATH)",
       "Bash(find /Users/umiyamatakeshi -maxdepth 3 -name *.gs -o -name appsscript.json -o -name .clasp.json)",
-      "Bash(find /Users/umiyamatakeshi -maxdepth 3 -type d -name *owndays* -o -type d -name *eyewear* -o -type d -name *gas* -o -type d -name *apps-script*)"
+      "Bash(find /Users/umiyamatakeshi -maxdepth 3 -type d -name *owndays* -o -type d -name *eyewear* -o -type d -name *gas* -o -type d -name *apps-script*)",
+      "Read(//Users/umiyamatakeshi/tollino-garden-db/$HOME/.nvm/versions/node/*/bin/**)",
+      "Read(//Users/umiyamatakeshi/tollino-garden-db/$HOME/.volta/bin/**)",
+      "Bash(/usr/local/bin/npx next:*)"
     ]
   }
 }

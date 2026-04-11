@@ -1,7 +1,7 @@
 // 観測テキストから一覧表示用の短い要約を生成する
 // LLMは使わず、テキスト処理で高速に生成
 
-const MAX_SUMMARY_LENGTH = 50;
+const MAX_SUMMARY_LENGTH = 40;
 
 /**
  * テキストから一覧表示用の要約を生成
