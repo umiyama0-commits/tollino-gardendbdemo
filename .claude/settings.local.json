@@ -92,7 +92,17 @@
       "WebFetch(domain:html.duckduckgo.com)",
       "mcp__Control_Chrome__list_tabs",
       "Bash(npx @google/clasp deployments)",
-      "mcp__Control_Chrome__open_url"
+      "mcp__Control_Chrome__open_url",
+      "mcp__Control_Chrome__get_page_content",
+      "Bash(npx @google/clasp deploy --deploymentId AKfycbzGvW3FGaJ11CmHKzjVhXHg4w4Ns32YIHZ24C1frPs8YxzTD2j1Ay1SHhLJEJwX7qtDig --description \"v7 - backfill endpoint\")",
+      "mcp__Control_Chrome__switch_to_tab",
+      "mcp__Control_Chrome__execute_javascript",
+      "WebFetch(domain:script.google.com)",
+      "mcp__Control_Chrome__get_current_tab",
+      "Bash(npx @google/clasp run scheduleImageBackfill)",
+      "Bash(python3 -c \"import sys,json; print\\(json.load\\(sys.stdin\\).get\\(''''id'''',''''''''\\)\\)\")",
+      "Bash(npx @google/clasp pull)",
+      "Bash(ls -la DataCollector.*)"
     ]
   }
 }

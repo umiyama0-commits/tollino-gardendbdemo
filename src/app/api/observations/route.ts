@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { CreateObservationInput, safeParse } from "@/lib/validation";
 import { saveObservationEmbedding } from "@/lib/embedding";
 import { generateSummary } from "@/lib/summary";
+import { computeObservationTrustScore } from "@/lib/trust-score";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -13,6 +14,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
   const input = parsed.data;
+
+  // タグのtype情報を取得してtrustScore計算に使う
+  const tagRecords = input.tagIds.length > 0
+    ? await prisma.ontologyTag.findMany({
+        where: { id: { in: input.tagIds } },
+        select: { id: true, type: true },
+      })
+    : [];
+  const tagTypes = new Set(tagRecords.map((t) => t.type));
+
+  const trustScore = computeObservationTrustScore({
+    confidence: input.confidence,
+    provenance: input.provenance,
+    createdAt: new Date(),
+    insightLinkCount: 0,
+    tagCount: input.tagIds.length,
+    tagTypes,
+  });
 
   const observation = await prisma.observation.create({
     data: {
@@ -27,6 +46,7 @@ export async function POST(request: NextRequest) {
       storeId: input.storeId || null,
       sourceType: input.sourceType || null,
       sourceTitle: input.sourceTitle || null,
+      trustScore,
       tags: {
         create: input.tagIds.map((tagId: string) => ({ tagId })),
       },
