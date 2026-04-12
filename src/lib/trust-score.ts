@@ -1,5 +1,5 @@
-// 信頼スコア計算: 時間減衰 + タグ充実度 + Provenance多層裏付け + Lint矛盾ペナルティ
-// 改善: ハードコードのProvenance重みをタグ充実度（データが語る重み）に置き換え
+// 信頼スコア計算: Provenance固定重み(大枠) × タグ充実度(精度) × 時間減衰 + Lint矛盾ペナルティ
+// Provenance重みは構造的な天井、タグ充実度はその中での精度向上
 
 import { prisma } from "@/lib/prisma";
 
@@ -14,6 +14,20 @@ function timeDecay(createdAt: Date): number {
 }
 
 // ─── タグ充実度スコア ─────────────────────────────────────
+
+/**
+ * Provenance固定重み: 構造的な天井として機能
+ * 公知はどれだけタグが充実していても固有知を超えない
+ */
+const PROVENANCE_WEIGHT: Record<string, number> = {
+  FIELD_OBSERVED: 1.0,
+  ANONYMIZED_DERIVED: 0.7,
+  PUBLIC_CODIFIED: 0.3,
+};
+
+export function getProvenanceWeight(provenance: string): number {
+  return PROVENANCE_WEIGHT[provenance] ?? 0.3;
+}
 
 /** タグ種別 */
 const TAG_TYPES = ["BEHAVIOR", "CONTEXT", "SPACE", "THEORY"] as const;
@@ -87,7 +101,9 @@ export async function getPublicRatioCap(): Promise<number> {
   return parseFloat(config?.value || "0.3");
 }
 
-/** Observationの信頼スコアを計算（タグ充実度ベース） */
+/** Observationの信頼スコアを計算
+ *  score = base × provenanceWeight(大枠の天井) × tagRichness(精度) × timeDecay
+ */
 export function computeObservationTrustScore(obs: {
   confidence: string;
   provenance: string;
@@ -102,8 +118,12 @@ export function computeObservationTrustScore(obs: {
   // Insightにリンクされている → +0.1（知見導出に使われた実績）
   if (obs.insightLinkCount > 0) base += 0.1;
 
-  // タグ充実度で重み付け（ハードコードのProvenance重みを置換）
-  // データの情報密度が自然に固有知>汎用知>公知の階層を作る
+  // Provenance固定重み: 構造的な天井（公知は最大でも固有知の30%）
+  const provWeight = getProvenanceWeight(obs.provenance);
+  base *= provWeight;
+
+  // タグ充実度: 大枠の中での精度向上
+  // 同じProvenanceでもタグが豊かなデータほど高スコア
   const tagRichness = computeTagRichnessScore(obs.tagCount, obs.tagTypes);
   base *= tagRichness;
 

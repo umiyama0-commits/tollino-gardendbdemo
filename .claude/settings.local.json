@@ -89,7 +89,10 @@
       "WebFetch(domain:news.google.com)",
       "WebFetch(domain:blog.favrspecs.com)",
       "WebFetch(domain:www.google.com)",
-      "WebFetch(domain:html.duckduckgo.com)"
+      "WebFetch(domain:html.duckduckgo.com)",
+      "mcp__Control_Chrome__list_tabs",
+      "Bash(npx @google/clasp deployments)",
+      "mcp__Control_Chrome__open_url"
     ]
   }
 }
