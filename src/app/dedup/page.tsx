@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { DedupClient } from "./dedup-client";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +12,9 @@ export default function DedupPage() {
           類似度が高いObservationを検出し、AIが統合案を生成。人間の承認後に1件に集約します。
         </p>
       </div>
-      <DedupClient />
+      <Suspense fallback={<div className="text-sm text-zinc-400">読み込み中…</div>}>
+        <DedupClient />
+      </Suspense>
     </div>
   );
 }

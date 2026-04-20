@@ -24,6 +24,7 @@ type Tag = {
 
 type Props = {
   tagsByType: Record<string, Tag[]>;
+  projectId: string | null;
 };
 
 const MODEL_LAYERS = [
@@ -69,7 +70,7 @@ type SuggestResponse = {
   error?: string;
 };
 
-export function IngestForm({ tagsByType }: Props) {
+export function IngestForm({ tagsByType, projectId }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [text, setText] = useState("");
   const [modelLayer, setModelLayer] = useState("");
@@ -145,6 +146,7 @@ export function IngestForm({ tagsByType }: Props) {
           provenance,
           confidence,
           tagIds: Array.from(selectedTags),
+          projectId,
         }),
       });
 
@@ -169,6 +171,7 @@ export function IngestForm({ tagsByType }: Props) {
               provenance: "FIELD_OBSERVED",
               confidence: "LOW",
               tagIds: [],
+              projectId,
             }),
           });
           setMemo("");

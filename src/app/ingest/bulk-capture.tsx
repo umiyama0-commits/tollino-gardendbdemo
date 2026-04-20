@@ -13,6 +13,7 @@ type Tag = {
 
 type Props = {
   tagsByType: Record<string, Tag[]>;
+  projectId: string | null;
 };
 
 type ExtractedObs = {
@@ -50,7 +51,7 @@ const PROVENANCE_LABELS: Record<string, string> = {
   PUBLIC_CODIFIED: "③公知",
 };
 
-export function BulkCapture({ tagsByType: _tagsByType }: Props) {
+export function BulkCapture({ tagsByType: _tagsByType, projectId }: Props) {
   const [rawText, setRawText] = useState("");
   const [extracting, setExtracting] = useState(false);
   const [observations, setObservations] = useState<ExtractedObs[]>([]);
@@ -120,6 +121,7 @@ export function BulkCapture({ tagsByType: _tagsByType }: Props) {
             provenance: obs.provenance,
             confidence: obs.confidence,
             tagIds: obs.tagIds,
+            projectId,
           }),
         });
 

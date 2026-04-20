@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -100,6 +101,9 @@ const DIRECTION_COLOR: Record<string, string> = {
 };
 
 export function DedupClient() {
+  const searchParams = useSearchParams();
+  const projectIdFilter = searchParams.get("projectId");
+
   const [threshold, setThreshold] = useState(0.85);
   const [scanning, setScanning] = useState(false);
   const [clusters, setClusters] = useState<Cluster[]>([]);
@@ -110,7 +114,9 @@ export function DedupClient() {
     setScanning(true);
     setScanError(null);
     try {
-      const res = await fetch(`/api/observations/duplicates?threshold=${threshold}`);
+      const params = new URLSearchParams({ threshold: threshold.toString() });
+      if (projectIdFilter) params.set("projectId", projectIdFilter);
+      const res = await fetch(`/api/observations/duplicates?${params}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "検出失敗");
       setClusters(data.clusters || []);
@@ -136,7 +142,15 @@ export function DedupClient() {
     } finally {
       setScanning(false);
     }
-  }, [threshold]);
+  }, [threshold, projectIdFilter]);
+
+  // プロジェクトからの遷移時は自動スキャン
+  useEffect(() => {
+    if (projectIdFilter) {
+      scan();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectIdFilter]);
 
   const setCanonical = useCallback((clusterId: string, memberId: string) => {
     setUi((prev) => {
@@ -293,6 +307,11 @@ export function DedupClient() {
 
   return (
     <div className="space-y-5">
+      {projectIdFilter && (
+        <div className="text-xs px-3 py-2 bg-violet-50 border border-violet-200 rounded-lg text-violet-800">
+          🎯 プロジェクト内でのみ重複検出を行っています
+        </div>
+      )}
       {/* 検出トリガー */}
       <Card className="shadow-sm">
         <CardContent className="py-4 flex items-center gap-4 flex-wrap">

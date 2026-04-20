@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/", label: "ダッシュボード" },
   { href: "/ingest", label: "データ取込" },
+  { href: "/projects", label: "プロジェクト" },
   { href: "/observations", label: "観測データ" },
   { href: "/insights", label: "洞察" },
   { href: "/qa", label: "Q&A" },

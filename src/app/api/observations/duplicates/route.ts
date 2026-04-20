@@ -8,6 +8,7 @@ export const maxDuration = 60;
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const thresholdParam = url.searchParams.get("threshold");
+  const projectId = url.searchParams.get("projectId") || undefined;
   const threshold = thresholdParam ? parseFloat(thresholdParam) : DUPLICATE_THRESHOLD;
 
   if (isNaN(threshold) || threshold < 0.5 || threshold > 1) {
@@ -18,8 +19,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const clusters = await detectDuplicateClusters(threshold);
-    return NextResponse.json({ threshold, clusters, total: clusters.length });
+    const clusters = await detectDuplicateClusters(threshold, projectId);
+    return NextResponse.json({ threshold, projectId: projectId || null, clusters, total: clusters.length });
   } catch (err) {
     console.error("Duplicate detection error:", err);
     return NextResponse.json(

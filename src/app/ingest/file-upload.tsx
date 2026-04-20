@@ -126,7 +126,11 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function FileUpload() {
+type FileUploadProps = {
+  projectId: string | null;
+};
+
+export function FileUpload({ projectId }: FileUploadProps) {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -335,6 +339,7 @@ export function FileUpload() {
               tagIds: obs.tagIds,
               sourceType: entry.rawFile.fileType,
               sourceTitle: entry.rawFile.fileName,
+              projectId,
             }),
           });
 
@@ -377,7 +382,7 @@ export function FileUpload() {
         prev.map((f) => (f.rawFile.id === rawFileId ? { ...f, batchProgress: null } : f)),
       );
     },
-    [files],
+    [files, projectId],
   );
 
   return (

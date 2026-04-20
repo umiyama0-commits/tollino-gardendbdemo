@@ -48,10 +48,33 @@ type DuplicatePair = {
 /**
  * 閾値以上の類似Observation対を抽出。同一projectId内のみマッチ
  * (projectIdがnullの場合は他のnullとだけマッチ)
+ * projectIdFilter を指定するとそのプロジェクトのみ対象
  */
 async function findDuplicatePairs(
   threshold: number = DUPLICATE_THRESHOLD,
+  projectIdFilter?: string,
 ): Promise<DuplicatePair[]> {
+  if (projectIdFilter) {
+    const rows = await prisma.$queryRawUnsafe<
+      { id1: string; id2: string; similarity: number }[]
+    >(
+      `SELECT a.id AS id1, b.id AS id2,
+              1 - (a.embedding <=> b.embedding) AS similarity
+       FROM "Observation" a
+       JOIN "Observation" b ON a.id < b.id
+         AND a."projectId" = b."projectId"
+       WHERE a.embedding IS NOT NULL AND b.embedding IS NOT NULL
+         AND a."projectId" = $1
+         AND 1 - (a.embedding <=> b.embedding) >= $2
+       ORDER BY similarity DESC
+       LIMIT $3`,
+      projectIdFilter,
+      threshold,
+      MAX_PAIRS,
+    );
+    return rows;
+  }
+
   const rows = await prisma.$queryRawUnsafe<
     { id1: string; id2: string; similarity: number }[]
   >(
@@ -102,8 +125,9 @@ export type DuplicateCluster = {
 
 export async function detectDuplicateClusters(
   threshold: number = DUPLICATE_THRESHOLD,
+  projectIdFilter?: string,
 ): Promise<DuplicateCluster[]> {
-  const pairs = await findDuplicatePairs(threshold);
+  const pairs = await findDuplicatePairs(threshold, projectIdFilter);
   if (pairs.length === 0) return [];
 
   // Union-Find でクラスタ化
