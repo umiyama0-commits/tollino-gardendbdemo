@@ -13,6 +13,7 @@ const navItems = [
   { href: "/search", label: "検索" },
   { href: "/patterns", label: "パターン" },
   { href: "/lint", label: "品質検証" },
+  { href: "/dedup", label: "重複統合" },
   { href: "/analysis-trees", label: "PF分析" },
   { href: "/dictionary", label: "公知辞書" },
   { href: "/admin", label: "管理" },

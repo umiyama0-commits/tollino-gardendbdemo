@@ -135,6 +135,22 @@ export const LLMBulkExtractOutput = z.object({
   })).max(30),
 });
 
+// ─── 観測データ統合（dedup reconciliation）スキーマ ─────────────────
+
+export const LLMReconcileOutput = z.object({
+  text: z.string(),
+  event: z.string().optional().default(""),
+  outcome: z.string().optional().default(""),
+  kpiImpacts: z.array(KpiImpact).optional().default([]),
+  modelLayer: ModelLayer,
+  primaryValueAxis: ValueAxis.nullable(),
+  provenance: Provenance,
+  confidence: Confidence,
+  tagCodes: z.array(z.string()).default([]),
+  reasoning: z.string(),
+  conflicts: z.array(z.string()).default([]),
+});
+
 // ─── ヘルパー ───────────────────────────────────────────
 
 /** Zodスキーマでパースし、失敗時は整形済みエラーメッセージを返す */
